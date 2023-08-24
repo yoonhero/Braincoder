@@ -40,14 +40,15 @@ def process_raw_data(raw_data, channels):
 
 
 # Get a data using roi time area.
-def get_roi_content(nd_data, nd_timestamp, start, end):
+def get_roi_content(nd_data, nd_timestamp, start, end, eps=1e-6):
     roi_timestamp = (nd_timestamp>=start)*(nd_timestamp<=end)
 
     roi_data = nd_data[:, roi_timestamp]
+    # roi_data += eps
 
     return roi_data
 
-def draw_spectogram(data, out):
+def draw_spectrogram(data, out):
     length = data.shape[0]
     # for i in range(length):
     # im = specgram(data, Fs=125, noverlap=1)[3]
@@ -59,7 +60,6 @@ def draw_spectogram(data, out):
     # plt.gca().yaxis.set_major_locator(matplotlib.ticker.NullLocator())
     # plt.savefig(out, bbox_inches = 'tight', pad_inches = 0)
     # plt.show()
-    print(data.shape)
     raw = spectrogram(data, fs=125, noverlap=1)[2]
     im = specgram(data, Fs=125, noverlap=1)[3]
     plt.gca().set_axis_off()
@@ -70,7 +70,7 @@ def draw_spectogram(data, out):
     plt.gca().yaxis.set_major_locator(matplotlib.ticker.NullLocator())
     plt.savefig(out, bbox_inches = 'tight',
         pad_inches = 0)
-    f.close()
+    # f.close()
 
 def draw_mel(data, out):
     pass
@@ -95,7 +95,7 @@ def process(file, data):
 
         target_edf_data = get_roi_content(roi_data, timestamp, start, end)
         draw_mel(target_edf_data, out)
-        new_row["spectogram"] = out
+        new_row["spectrogram"] = out
         data.append(new_row)
     
     return data
@@ -148,7 +148,7 @@ if __name__ == "__main__":
         if end > new_row["end"]: continue
 
         target_edf_data = get_roi_content(roi_data, timestamp, start, end)
-        new_row["spectogram"] = []
+        new_row["spectrogram"] = []
 
         if target_edf_data.shape[1] > hz_experiement_interval:
             target_edf_data = target_edf_data[:, :hz_experiement_interval]
@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
         for i in range(target_edf_data.shape[0]):
             out_name = out.format(id=new_row['id'], channel=i)
-            draw_spectogram(target_edf_data[i, :], out_name)
-            new_row["spectogram"].append(out_name)
+            draw_spectrogram(target_edf_data[i, :], out_name)
+            new_row["spectrogram"].append(out_name)
 
         print(new_row)
