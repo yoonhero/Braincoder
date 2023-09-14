@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEE</title>
+
+    <style>
+        .hidden {
+            display: hidden;
+        }
+
+        .main_con { 
+            
+        }        
+
+        main {
+            width: 100vw;
+            height: 100vh;
+            background-color: #B5DA92;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .on_start_con {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+    
+        .start_btn {
+            padding: 1.25rem 2.5rem;
+            font-weight: 600;
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+            background-color: white;
+            color: gray;
+        }
+    </style>
+
+</head>
+<body>
+    <main>
+        <div class="on_start_con">
+            <h1>사진 만장을 봅시다</h1>
+            <button class="start_btn">Start</button>
+        </div>
+
+        <div class="main_con hidden">
+            <img class="main_img" />
+        </div>
+
+        <div class="timer_con hidden">
+
+        </div>
+    </main>
+
+    <script>
+        const start_con = document.querySelector(".on_start_con")
+        const start_btn = document.querySelector(".start_btn")
+        const main_con = document.querySelector(".main_con")
+        const timer_con = document.querySelector(".timer_con")
+
+        const main_image = document.querySelector(".main_img")
+
+        let current_id = ""
+
+        function on_view(){
+            // timer_con.classList.add("hidden")
+            const response = fetch("/getimg").then(res => res.json())
+            main_image.src = response.url
+            current_id = response.id
+
+            main_con.classList.remove("hidden")
+
+            setTimeout(on_see, 6000)
+        }
+
+        function on_see() {
+            main_con.classList.add("hidden")
+            const data = {id: current_id} 
+            console.log(data)
+
+            const resopnse = fetch("/see", {
+                method: "POST",
+                body: JSON.stringify(data)
+            }).then(res => res.json())
+
+            if (!resopnse.error){
+                console.log(response)
+                return
+            }
+
+            setTimeout(on_view, 4000)
+        }
+
+        start_btn.addEventListener("click", () => {
+            start_con.classList.add("hidden")
+            on_view()
+        })
+
+    </script>
+</body>
+</html>

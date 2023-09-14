@@ -10,6 +10,9 @@ from config import experiement_interval, hz, drive_src, channels
 import random
 import cv2
 import tqdm
+from sklearn.manifold import TSNE
+import seaborn as sns
+
 
 def viz_subplot_for_spectrogram_compare(data):
     fig = plt.figure()
@@ -80,5 +83,33 @@ def viz_image_with_spectrogram(target_folder):
     for data in tqdm.tqdm(datas, desc="Drawing Subplots"):
         viz_subplot_for_spectrogram_compare(data)
 
+def show_tsne(x, y, title):
+    tsne = TSNE(n_components=2, verbose=1, random_state=123)
+    z = tsne.fit_transform(x)
+    df = pd.DataFrame()
+    df["y"] = y
+    df["feature-1"] = z[:, 0]
+    df["feature-2"] = z[:, 1]
+
+    sns.scatterplot(x="feature-1", y="feature-2", hue=df.y.tolist(), palette=sns.color_palette("hls", 3),
+                data=df).set(title=title)
+
+def tsne_specific_channel(dir, channel_idx):
+    files = glob.glob(dir + f"/*{channel_idx}.png")
+    title = f"Channel {channels[channel_idx]} Gazing Data Difference"
+
+    coco = COCO("./coco_viewer_api_server/captions_val2014.json")
+
+    for file in files:
+        img_id = os.path.split(file)[-1].split("_")[0]
+        print(img_id)
+        image, ann = coco.get_image_by_id(img_id)
+        print(ann)
+        break
+
+    # show_tsne()
+
+
 if __name__ == "__main__":
-    viz_image_with_spectrogram("./raw/attempt_1")
+    # viz_image_with_spectrogram("./raw/attempt_1")
+    tsne_specific_channel("./dataset", 0)

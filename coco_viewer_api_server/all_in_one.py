@@ -1,8 +1,5 @@
 import time
-start = time.time()*1000
-print(start)
-
-from flask import Flask, jsonify, make_response, request
+from flask import Flask, jsonify, make_response, request, render_template
 from flask_cors import CORS, cross_origin
 import pandas as pd
 import random
@@ -19,6 +16,7 @@ import glob
 import json
 from coco import COCO
 
+start = None
 app = Flask(__name__)
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 
@@ -66,6 +64,12 @@ def sampling():
     
     return im, caption
 
+
+@app.route("/", methods=["GET"])
+@cross_origin()
+def home():
+    return render_template("index.html")
+
 @app.route('/getimg', methods=["GET"])
 @cross_origin()
 def board():
@@ -106,5 +110,24 @@ def see():
 
     return jsonify({"error": False})
 
+@app.route("/stop", methods=["GET"])
+def stop():
+    global start
+    start = None
+
+    return jsonify({"status": "timer reset successfully"})
+
+@app.route("/restart", methods=["GET"])
+def restart():
+    global start
+    start = time.time()
+
+    return jsonify({"status": "timer restarting successfully"})
+
 if __name__ == "__main__":
-    app.run(host="localhost",port=8000)
+    app.run(host="localhost", port=8000)
+
+    _temp = input()
+    start = time.time()*1000
+    print(start)
+

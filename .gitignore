@@ -167,3 +167,6 @@ brain2image/
 node_modules
 .next
 mnist_png
+
+.csv
+*.csv
