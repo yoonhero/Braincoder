@@ -93,7 +93,9 @@ def board():
 @cross_origin()
 def see():
     global df, start
+    # print("asdfasdfadfasdfasdf")
     data = request.json
+    # print(data)
     if data["id"] == "":
         return jsonify({"error": "oh no"})
     
@@ -102,11 +104,13 @@ def see():
 
     df.loc[df["id"] == data["id"], "end"] = end - start
     df.loc[df["id"] == data["id"], "start"] = temp_start - start
+    # print("asdf")
 
     update_df()
 
     seen.append(data["id"])
     save_seen()
+    # print("asdf")
 
     return jsonify({"error": False})
 
@@ -120,14 +124,13 @@ def stop():
 @app.route("/restart", methods=["GET"])
 def restart():
     global start
-    start = time.time()
+    start = time.time()*1000
 
     return jsonify({"status": "timer restarting successfully"})
 
 if __name__ == "__main__":
+    # _temp = input()
+    # start = time.time()*1000
+    # print(start)
+
     app.run(host="localhost", port=8000)
-
-    _temp = input()
-    start = time.time()*1000
-    print(start)
-
