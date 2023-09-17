@@ -1,45 +1,15 @@
-from transformers import CLIPTextModel, CLIPTokenizer
-from diffusers import AutoencoderKL, UNet2DConditionModel, PNDMScheduler
-from diffusers import LMSDiscreteScheduler
 import torch
 import torch.nn as nn
 from PIL import Image
 from functools import lru_cache
 from tqdm.auto import tqdm
-import time
 import matplotlib.pyplot as plt
+from diffusers import AutoencoderKL, UNet2DConditionModel
+from diffusers import LMSDiscreteScheduler
 
-lru_cache()
-def _init(device="cuda"):
-    start = time.time()
-    # 1. Load the autoencoder model which will be used to decode the latents into image space. 
-    vae = AutoencoderKL.from_pretrained("CompVis/stable-diffusion-v1-4", subfolder="vae")
+from helper import prepare_diffuser, prepare_text_embedding, text2emb
 
-    # 2. The UNet model for generating the latents.
-    unet = UNet2DConditionModel.from_pretrained("CompVis/stable-diffusion-v1-4", subfolder="unet")
-
-    # diffusion process scheduler
-    scheduler = LMSDiscreteScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", num_train_timesteps=1000)
-
-    vae.to(device)
-    unet.to(device) 
-
-    print(f"Load Diffusion Model Finished in {time.time() - start}")
-
-    return vae, unet, scheduler
-
-def _prepare_text_embedding(device):
-    # 2. Load the tokenizer and text encoder to tokenize and encode the text. 
-    tokenizer = CLIPTokenizer.from_pretrained("openai/clip-vit-large-patch14")
-    text_encoder = CLIPTextModel.from_pretrained("openai/clip-vit-large-patch14")
-
-    text_encoder.to(device)
-
-    return tokenizer, text_encoder
-
-
-def generate(embedding, num_inference_steps=100, guidance_scale=7.5, device="cuda"):
-    vae, tokenizer, text_encoder, unet, scheduler = _init()
+def generate(embedding, vae: AutoencoderKL, unet: UNet2DConditionModel, scheduler: LMSDiscreteScheduler, device, num_inference_steps=100, guidance_scale=7.5):
     width, height = 512, 512
     generator = torch.manual_seed(0)    # Seed generator to create the inital latent noise
     scheduler.set_timesteps(num_inference_steps)
@@ -84,16 +54,15 @@ def generate(embedding, num_inference_steps=100, guidance_scale=7.5, device="cud
     return pil_images
 
 
-def text2img(prompt, device): 
-    tokenizer, text_encoder = _prepare_text_embedding()
+def text2img(prompt, device="cuda"): 
+    vae, unet, scheduler = prepare_diffuser(device)
+    tokenizer, text_encoder = prepare_text_embedding(device)
 
     batch_size = len(prompt)
 
-    # compute the latent vector for the conditional generation
-    text_input = tokenizer(prompt, padding="max_length", max_length=tokenizer.model_max_length, truncation=True, return_tensors="pt")
-    text_embeddings = text_encoder(text_input.input_ids.to(device))[0]
+    text_tokened, text_embeddings = text2emb(prompt, tokenizer=tokenizer, text_encoder=text_encoder, device=device)
 
-    max_length = text_input.input_ids.shape[-1]
+    max_length = text_tokened.input_ids.shape[-1]
     uncond_input = tokenizer(
         [""] * batch_size, padding="max_length", max_length=max_length, return_tensors="pt"
     )
@@ -101,7 +70,7 @@ def text2img(prompt, device):
 
     text_embeddings = torch.cat([uncond_embeddings, text_embeddings])
 
-    images = generate(text_embeddings, device=device)
+    images = generate(text_embeddings, vae=vae, unet=unet, scheduler=scheduler, device=device)
 
     return images
 
