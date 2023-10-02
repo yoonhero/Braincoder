@@ -1,0 +1,12 @@
+numpy
+mne
+pandas
+matplotlib
+json
+scipy
+transformers
+diffusers
+torch
+torchvision
+tqdm
+pytorch_lightning 
