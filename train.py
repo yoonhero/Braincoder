@@ -7,7 +7,7 @@ from lightning.pytorch.loggers import WandbLogger
 
 from argparse import ArgumentParser
 
-from braincoder import LinearModel
+from braincoder import linear
 from dataloader import create_dataloader
 from braincoder import generate, prepare_diffuser, prepare_text_embedding
 
@@ -22,7 +22,7 @@ model_name = args.model_name
 
 # ================= HYPER PARAMETERS ================
 models = {
-    "linear": LinearModel,
+    "linear": linear,
     "coatnet": None
 }
 
