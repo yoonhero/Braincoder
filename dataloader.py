@@ -46,7 +46,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
         _data = load_json(dataset_path)
         dataset = []
         for d in _data:
-            _spec = d["spectogram"]
+            _spec = d["spectrogram"]
             _sorted_spec = sorted(_spec, key=_sort_key)
             
             data_row = (d["id"], _sorted_spec, d["caption"])
@@ -54,7 +54,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
             dataset.append(data_row)
         self.dataset = dataset
 
-        self.tokenizer, self.text_encoder = prepare_text_embedding()
+        self.tokenizer, self.text_encoder = prepare_text_embedding(device=device)
         if caching:
             self.save_caption_emb()
         elif self.from_cache:
