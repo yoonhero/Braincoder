@@ -79,7 +79,7 @@ def process(file, data):
     table = {}
 
     raw_data, info, channels = read_edf_file(file)
-    print(f"INFO: {info}")
+    #print(f"INFO: {info}")
     roi_data, timestamp = process_raw_data(raw_data, channels)
 
     record_data = table[file]
