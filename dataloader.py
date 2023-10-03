@@ -13,6 +13,7 @@ from functools import lru_cache
 import multiprocessing
 import os
 import h5py
+from argparse import ArgumentParser
 
 from braincoder import prepare_text_embedding, text2emb
 from utils import load_json, load_spectos
@@ -119,8 +120,13 @@ def create_dataloader(cache_dir, seed=1234):
 
 
 if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--path", type=str)
+    args = parser.parse_args()
+    path = args.path
+
     # PreCaching for memory efficient training pipeline.
-    dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./dataset.json", "cuda", width=320, height=240, caching=True)
+    dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(path, "cuda", width=320, height=240, caching=True)
 
     for i in range(len(dataset)):
         x, y = dataset[i]
