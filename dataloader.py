@@ -15,7 +15,7 @@ import os
 import h5py
 from argparse import ArgumentParser
 
-from braincoder import prepare_text_embedding, text2emb
+from diffusion_helper import prepare_text_embedding, text2emb
 from utils import load_json, load_spectos
 
 
@@ -56,6 +56,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
 
         self.tokenizer, self.text_encoder = prepare_text_embedding(device=device)
         if caching:
+            torch.multiprocessing.set_start_method('spawn')
             self.save_caption_emb()
         elif self.from_cache:
             self.load_cache(cache_dir)
@@ -65,7 +66,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
     def __getitem__(self, index):
         im_id, specto, caption = self.dataset[index]
 
-        x = load_spectos(specto, self.width, self.height, self.device)
+        x = load_spectos(specto, self.transforms, self.device)
 
         if not self.from_cache:
             _, y = text2emb(caption, self.tokenizer, self.text_encoder, self.device)
@@ -76,18 +77,22 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
         return x, y
 
     def save_caption_emb(self):
-        with multiprocessing.Pool(os.cpu_count() - 1) as p:
-            result = p.map(self.to_emb, self.dataset)
+        # with multiprocessing.Pool(os.cpu_count() - 1) as p:
+            # result = p.map(self.to_emb, self.dataset)
 
-            # pip install h5py
-            f = h5py.File("cache.hdf5", "w")
+        result = []
+        for item in self.dataset:
+            temp = self.to_emb(item)
+            result.append(temp)
 
-            # f.create_dataset()
-            for (id, embedding) in result:
-                doc_id = f"data/{id}"
-                f.create_dataset(doc_id, data=embedding)
-            
-            f.close()
+        f = h5py.File("cache.hdf5", "w")
+
+        # f.create_dataset()
+        for (id, embedding) in result:
+            doc_id = f"data/{id}"
+            f.create_dataset(doc_id, data=embedding)
+        
+        f.close()
     
     def load_cache(self, cache_dir):
         f = h5py.File(cache_dir, "r")
@@ -100,11 +105,12 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
         return self.cache_dataset[id]
 
     def to_emb(self, data):
-        embedding = text2emb(data["caption"], self.tokenizer, self.text_encoder, self.device)
-        return (data["id"], embedding)
+        _, embedding = text2emb(data[2], self.tokenizer, self.text_encoder, self.device)
+        np_emb = embedding.cpu().numpy()
+        return (data[0], np_emb)
         
     def __len__(self):
-        return len(self._data)
+        return len(self.dataset)
 
 
 def create_dataloader(cache_dir, seed=1234):

@@ -7,9 +7,9 @@ from lightning.pytorch.loggers import WandbLogger
 
 from argparse import ArgumentParser
 
-from braincoder import linear
+from diffusion_helper import linear
 from dataloader import create_dataloader
-from braincoder import generate, prepare_diffuser, prepare_text_embedding
+from diffusion_helper import generate, prepare_diffuser, prepare_text_embedding
 
 # Get SYS arguments of model type selection.
 parser = ArgumentParser(description="braincoder training pipeline")

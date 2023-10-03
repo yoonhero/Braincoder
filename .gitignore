@@ -170,3 +170,6 @@ mnist_png
 
 .csv
 *.csv
+
+dataset.zip
+cache.hdf5
