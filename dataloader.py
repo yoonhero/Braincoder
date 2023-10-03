@@ -20,7 +20,7 @@ from utils import load_json, load_spectos
 
 
 def _sort_key(x):
-    return int(x.split("_")[-1])
+    return int(x.split("_")[-1].split(".")[0])
 
 
 class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
