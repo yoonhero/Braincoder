@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from diffusers import AutoencoderKL, UNet2DConditionModel
 from diffusers import LMSDiscreteScheduler
 
-from helper import prepare_diffuser, prepare_text_embedding, text2emb
+from braincoder import prepare_diffuser, prepare_text_embedding, text2emb
 
 def generate(embedding, vae: AutoencoderKL, unet: UNet2DConditionModel, scheduler: LMSDiscreteScheduler, device, num_inference_steps=100, guidance_scale=7.5):
     width, height = 512, 512
