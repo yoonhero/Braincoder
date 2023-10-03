@@ -74,7 +74,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
             y = self.get_emb_from_cache(im_id)
             y = torch.from_numpy(y).to(self.device)
 
-        return x, y
+        return x, y, im_id
 
     def save_caption_emb(self):
         # with multiprocessing.Pool(os.cpu_count() - 1) as p:
@@ -113,14 +113,14 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
         return len(self.dataset)
 
 
-def create_dataloader(cache_dir, seed=1234):
+def create_dataloader(batch_size, cache_dir, seed=1234):
     G = torch.Generator()
     G.manual_seed(seed)
     train_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./train_dataset.json", "cuda", width=320, height=240, from_cache=True, cache_dir=cache_dir)
     eval_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./eval_dataset.json", "cuda", width=320, height=240, from_cache=True)
 
-    trainloader = DataLoader(train_dataset, batch_size=128, shuffle=True, generator=G)
-    evalloader = DataLoader(eval_dataset, batch_size=128, shuffle=False, generator=G)
+    trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=G)
+    evalloader = DataLoader(eval_dataset, batch_size=batch_size, shuffle=False, generator=G)
 
     return trainloader, evalloader
 

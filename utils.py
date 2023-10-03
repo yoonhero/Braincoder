@@ -49,5 +49,5 @@ def load_spectos(paths, transform, device):
     transformed = [transform(im) for im in images]
 
     stacking = torch.cat(transformed, dim=0).to(device)
-    stacking /= 255
+    # stacking /= 255
     return stacking
