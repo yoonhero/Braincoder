@@ -95,7 +95,7 @@ run = wandb.init(
 
 # ---------------- VANILLA TRaining LOOP --------------------
 model = models[model_name].from_cfg(model_cfg).to(device)
-compiled_model = torch.compile(model)
+# compiled_model = torch.compile(model)
 # are you criminal?
 # wandb.watch(model, log="gradients")
 
@@ -119,7 +119,7 @@ def train():
         _loss = []
         for step, batch in enumerate(tqdm.tqdm(train_loader)):
             x, y, _ = batch
-            yhat = compiled_model(x)
+            yhat = model(x)
 
             loss = loss_term(y, yhat)
 
