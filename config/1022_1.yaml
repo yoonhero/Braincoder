@@ -3,7 +3,6 @@ model:
   initial_channel: 42
   num_blocks: 
     - 2
-    - 2
     - 3
     - 5
     - 2
@@ -11,7 +10,6 @@ model:
     - 42
     - 64
     - 196
-    - 192
     - 384
     - 768
   block_type: 
