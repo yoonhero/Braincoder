@@ -1,0 +1,36 @@
+model:
+  image_shape: [320, 240]
+  initial_channel: 42
+  num_blocks: 
+    - 2
+    - 2
+    - 3
+    - 5
+    - 2
+  channels: 
+    - 42
+    - 64
+    - 196
+    - 192
+    - 384
+    - 768
+  block_type: 
+    - C
+    - C 
+    - T
+    - T
+
+exp:
+  learning_rate: 1e-3
+  batch_size: 64
+  epochs: 20
+  betas: [0.95, 0.99]
+  cache_dir: "./cache.hdf5"
+  checkpoint_dir: "./tmp/231022"
+  image_dir: "./dataset"
+  num_to_samples: 5
+
+  metrics:
+    - l2
+    - kl
+  log: True

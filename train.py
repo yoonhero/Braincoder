@@ -10,38 +10,45 @@ from argparse import ArgumentParser
 from model import LinearModel
 from dataloader import create_dataloader
 from diffusion_helper import generate, prepare_diffuser, prepare_text_embedding
+from utils import read_config
 
 # Get SYS arguments of model type selection.
 parser = ArgumentParser(description="braincoder training pipeline")
 
 deafult_model_name = "linear"
 parser.add_argument("--model_name", default=deafult_model_name, type=str)
+parser.add_argument("--cfg", default="./config/exp_config_yaml", type=str)
 
 args = parser.parse_args()
 model_name = args.model_name
+cfg_file_path = args.cfg
 
 # ================= HYPER PARAMETERS ================
 models = {
     "linear": LinearModel,
     "coatnet": None
 }
-
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-learning_rate = 1e-3
-batch_size = 64
-epochs = 20
+cfg = read_config(cfg_file_path)
+exp_cfg = cfg["exp"]
+model_cfg = cfg["model"]
 
-b1, b2 = 0.95, 0.99
+learning_rate = exp_cfg["learning_rate"] 
+batch_size = exp_cfg["batch_size"]
+epochs = exp_cfg["epochs"]
 
-cache_dir = "./cache.hdf5"
+b1, b2 = exp_cfg["betas"]
 
-checkpoint_dir = f"./tmp/{model_name}"
+cache_dir = exp_cfg["cache_dir"]
+checkpoint_dir = exp_cfg["checkpoint_dir"]
+image_dir = exp_cfg["image_dir"]
+
+num_to_samples = exp_cfg["num_to_samples"]
 
 # =================== DATASET LOADING =====================
-train_loader, eval_loader = create_dataloader(batch_size=batch_size, cache_dir=cache_dir)
+train_loader, eval_loader = create_dataloader(batch_size=batch_size, cache_dir=cache_dir, image_dir=image_dir, device=device)
 
-num_to_samples = 5
 to_samples = []
 to_samples_keys = []
 for i in range(num_to_samples):
@@ -131,7 +138,7 @@ class LigthningPipeline(pl.LightningModule):
         wandb_logger.log_image(key="samples", images=images, caption=self.to_sample_keys)
 
 
-model = LigthningPipeline(model_name=model_name, learning_rate=learning_rate, batch_size=batch_size, to_samples=to_samples, to_sample_keys=to_samples_keys, device=device)
+model = LigthningPipeline(model_name=model_name, learning_rate=learning_rate, batch_size=batch_size, to_samples=to_samples, to_sample_keys=to_samples_keys, device=device, cfg=model_cfg)
 
 # Logging Gradient
 wandb_logger.watch(model)

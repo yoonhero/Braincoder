@@ -3,6 +3,7 @@ import json
 from functools import lru_cache
 from PIL import Image
 import torch
+import yaml
 
 
 def make_indexing(path):
@@ -51,3 +52,10 @@ def load_spectos(paths, transform, device):
     stacking = torch.cat(transformed, dim=0).to(device)
     # stacking /= 255
     return stacking
+
+
+def read_config(yaml_path):
+    with open(yaml_path) as f:
+        cfg = yaml.load(f, Loader=yaml.FullLoader)
+        
+    return cfg
