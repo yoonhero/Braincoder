@@ -120,7 +120,7 @@ class LigthningPipeline(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, y, _ = batch
         logits = self(x)
-        loss = F.mse_loss(logits, y)
+        loss = F.mse_loss(logits, y).cpu().detach().item()
         #metrics = {'test_loss': loss}
         #self.log_dict(metrics)    
         self.log("test/loss", loss)
