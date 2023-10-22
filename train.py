@@ -9,6 +9,7 @@ import tqdm
 
 from argparse import ArgumentParser
 import os
+import time
 
 from model import LinearModel, CoAtNet
 from dataloader import create_dataloader
@@ -84,7 +85,7 @@ run = wandb.init(
 
 # ---------------- VANILLA TRaining LOOP --------------------
 model = models[model_name].from_cfg(model_cfg).to(device)
-wandb.watch(model, log="all")
+wandb.watch(model, log="gradients")
 
 def loss_term(y, y_hat):
     l2_loss = F.mse_loss(y_hat, y)
@@ -100,13 +101,16 @@ def train():
         # Main Training
         _loss = []
         for step, batch in enumerate(tqdm.tqdm(train_loader)):
+            start = time.time()
             x, y, _ = batch
+            print(f"bottleneck? {time.time() - start}")
+            
             yhat = model(x)
             loss = loss_term(y, yhat)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            _loss.append(loss.item())
+            _loss.append(loss.cpu().detach().item())
 
         run.log({"train/loss": _loss.sum() / len(_loss)})
         
@@ -116,7 +120,7 @@ def train():
                 x, y, _ = batch
                 yhat = model(x)
                 loss = loss_term(y, yhat)
-                _loss.append(loss.item())
+                _loss.append(loss.cpu().detach().item())
 
             run.log({"val/loss": _loss.sum() / len(_loss)})
 
