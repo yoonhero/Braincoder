@@ -27,7 +27,7 @@ exp:
   alpha: 0.7
   cache_dir: "/content/drive/MyDrive/brainstormers/cache.hdf5"
   checkpoint_dir: "/content/drive/MyDrive/brainstormers/231022"
-  image_dir: "/content/drive/MyDrive/brainstormers/dataset/dataset"
+  image_dir: "/content/dataset"
   num_to_samples: 5
 
   metrics:

@@ -85,6 +85,7 @@ run = wandb.init(
 
 # ---------------- VANILLA TRaining LOOP --------------------
 model = models[model_name].from_cfg(model_cfg).to(device)
+compiled_model = torch.compile(model)
 # are you criminal?
 # wandb.watch(model, log="gradients")
 
@@ -103,7 +104,7 @@ def train():
         _loss = []
         for step, batch in enumerate(tqdm.tqdm(train_loader)):
             x, y, _ = batch
-            yhat = model(x)
+            yhat = compiled_model(x)
 
             loss = loss_term(y, yhat)
             loss.backward()
@@ -114,14 +115,15 @@ def train():
         run.log({"train/loss": loss.cpu().detach().item()})
         
         if step % valid_term == 0:
-            _loss = []
-            for batch in eval_loader:
-                x, y, _ = batch
-                yhat = model(x)
-                loss = loss_term(y, yhat)
-                _loss.append(loss.cpu().detach().item())
+            with torch.no_grad():
+                _loss = []
+                for batch in eval_loader:
+                    x, y, _ = batch
+                    yhat = model(x)
+                    loss = loss_term(y, yhat)
+                    _loss.append(loss.cpu().detach().item())
 
-            run.log({"val/loss": _loss.sum() / len(_loss)})
+                run.log({"val/loss": _loss.sum() / len(_loss)})
 
         torch.save(model.state_dict(), f"{checkpoint_dir}/{epoch}.pt")
 
