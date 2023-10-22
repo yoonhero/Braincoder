@@ -23,6 +23,7 @@ exp:
   batch_size: 64
   epochs: 20
   betas: [0.95, 0.99]
+  alpha: 0.7
   cache_dir: "./cache.hdf5"
   checkpoint_dir: "./tmp/231022"
   image_dir: "./dataset"

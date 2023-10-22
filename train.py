@@ -40,6 +40,7 @@ batch_size = exp_cfg["batch_size"]
 epochs = exp_cfg["epochs"]
 
 b1, b2 = exp_cfg["betas"]
+alpha = exp_cfg["alpha"]
 
 cache_dir = exp_cfg["cache_dir"]
 checkpoint_dir = exp_cfg["checkpoint_dir"]
@@ -75,13 +76,14 @@ tokenizer, text_encoder = prepare_text_embedding(device=device)
 
 # ================ Pytorch Ligthning Training Module ===========
 class LigthningPipeline(pl.LightningModule):
-    def __init__(self, model_name, to_samples, to_sample_keys, learning_rate, device, batch_size, **kwargs):
+    def __init__(self, model_name, to_samples, to_sample_keys, learning_rate, device, batch_size, alpha, **kwargs):
         super().__init__()
         self.save_hyperparameters()
 
         self.learning_rate = learning_rate
         # self.device = device
         self.batch_size = batch_size
+        self.alpha = alpha
 
         self.model_name = model_name
         self.model = models[model_name].from_cfg(**kwargs)
@@ -103,8 +105,8 @@ class LigthningPipeline(pl.LightningModule):
 
     def loss_term(self, y_hat, y):
         l1_loss = F.l1_loss(y_hat, y)
-        kl_loss = self.criterion(y_hat, y)
-        loss = l1_loss + kl_loss
+        kl_loss = self.criterion(F.softmax(y_hat), F.softmax(y))
+        loss = self.alpha*l1_loss + (1-self.alpha)*kl_loss
 
         return loss
 
@@ -112,7 +114,7 @@ class LigthningPipeline(pl.LightningModule):
         x, y, _ = batch
         y_hat = self(x)
         loss = self.loss_term(y_hat, y)
-        self.log({"train/loss", loss})
+        self.log("train/loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -121,7 +123,7 @@ class LigthningPipeline(pl.LightningModule):
         loss = F.l1_loss(logits, y)
         #metrics = {'test_loss': loss}
         #self.log_dict(metrics)    
-        self.log({"test/loss", loss})
+        self.log("test/loss", loss)
 
     def diffuse_with_braincoder_emb(self, emb):
         pil_images = generate(embedding=emb, vae=self.vae, unet=self.unet, scheduler=self.scheduler, device=self.device)
@@ -144,7 +146,7 @@ class LigthningPipeline(pl.LightningModule):
         wandb_logger.log_image(key="samples", images=images, caption=self.to_sample_keys)
 
 
-model = LigthningPipeline(model_name=model_name, learning_rate=learning_rate, batch_size=batch_size, to_samples=to_samples, to_sample_keys=to_samples_keys, device=device, cfg=model_cfg)
+model = LigthningPipeline(model_name=model_name, learning_rate=learning_rate, batch_size=batch_size, to_samples=to_samples, to_sample_keys=to_samples_keys, device=device, alpha=alpha, cfg=model_cfg)
 
 # Logging Gradient
 wandb_logger.watch(model)
