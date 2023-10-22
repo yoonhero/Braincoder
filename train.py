@@ -108,9 +108,9 @@ def train():
             print(f"bottleneck? {time.time() - start}")
 
             loss = loss_term(y, yhat)
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            optimizer.zero_grad(set_to_none=True)
             _loss.append(loss.cpu().detach().item())
 
         run.log({"train/loss": _loss.sum() / len(_loss)})
