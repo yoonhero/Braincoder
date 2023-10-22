@@ -113,7 +113,7 @@ class LigthningPipeline(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, y, _ = batch
         y_hat = self(x)
-        loss = self.loss_term(y_hat, y)
+        loss = self.loss_term(y_hat, y).cpu().detach().item()
         self.log("train/loss", loss)
         return loss
 
