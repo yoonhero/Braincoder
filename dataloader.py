@@ -47,13 +47,17 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
         _data = load_json(dataset_path)
         dataset = []
         for d in _data:
-            _spec = d["spectrogram"]
-            _sorted_spec = sorted(_spec, key=_sort_key)
+            try:
+                _spec = d["spectogram"]
+            except: 
+                print(f"WARNING: this data has problem {d}")
+                continue
 
             if len(_spec) != 14:
                 print(f"WARNING: this data has problem {d}")
                 continue
             
+            _sorted_spec = sorted(_spec, key=_sort_key)
             # change image directory for loading in various environment.
             _cleaned_spec = map(lambda x: f"{image_dir}/{x.split('/')[-1]}", _sorted_spec)
             data_row = (d["id"], _cleaned_spec, d["caption"])
@@ -79,7 +83,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
             _, y = text2emb(caption, self.tokenizer, self.text_encoder, self.device)
         else:
             y = self.get_emb_from_cache(im_id)
-            y = torch.from_numpy(y).to(self.device)
+            y = torch.from_numpy(y[:]).to(self.device)
 
         return x, y, im_id
 
@@ -109,7 +113,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
         self.cache_dataset.close()
     
     def get_emb_from_cache(self, id):
-        return self.cache_dataset[id]
+        return self.cache_dataset[str(id)]
 
     def to_emb(self, data):
         _, embedding = text2emb(data[2], self.tokenizer, self.text_encoder, self.device)
@@ -124,7 +128,7 @@ def create_dataloader(batch_size, image_dir, cache_dir, device, seed=1234):
     G = torch.Generator()
     G.manual_seed(seed)
     train_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./train_dataset.json", image_dir, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
-    eval_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./eval_dataset.json", image_dir, device=device, width=320, height=240, from_cache=True)
+    eval_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./eval_dataset.json", image_dir, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
 
     trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=G)
     evalloader = DataLoader(eval_dataset, batch_size=batch_size, shuffle=False, generator=G)

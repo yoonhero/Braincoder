@@ -6,8 +6,9 @@ import pytorch_lightning as pl
 from lightning.pytorch.loggers import WandbLogger
 
 from argparse import ArgumentParser
+import os
 
-from model import LinearModel
+from model import LinearModel, CoAtNet
 from dataloader import create_dataloader
 from diffusion_helper import generate, prepare_diffuser, prepare_text_embedding
 from utils import read_config
@@ -26,7 +27,7 @@ cfg_file_path = args.cfg
 # ================= HYPER PARAMETERS ================
 models = {
     "linear": LinearModel,
-    "coatnet": None
+    "coatnet": CoAtNet
 }
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -42,20 +43,24 @@ b1, b2 = exp_cfg["betas"]
 
 cache_dir = exp_cfg["cache_dir"]
 checkpoint_dir = exp_cfg["checkpoint_dir"]
+os.mkdir(checkpoint_dir)
 image_dir = exp_cfg["image_dir"]
 
 num_to_samples = exp_cfg["num_to_samples"]
+
+print(cfg)
 
 # =================== DATASET LOADING =====================
 train_loader, eval_loader = create_dataloader(batch_size=batch_size, cache_dir=cache_dir, image_dir=image_dir, device=device)
 
 to_samples = []
 to_samples_keys = []
-for i in range(num_to_samples):
-    temp, key = next(iter(eval_loader))
-    to_samples.append(temp)
-    to_samples_keys.append(key)
-to_samples = torch.stack(to_samples, dim=0).to(device)
+# for i in range(num_to_samples):
+temp, key = next(iter(eval_loader))
+to_samples = temp[:num_to_samples].to("cpu")
+to_samples_keys = key[:num_to_samples]
+print(to_samples_keys)
+# to_samples = torch.stack(to_samples, dim=0).to(device)
 #to_sample = next(iter(eval_loader))
 
 # ================== LOGGER =================
@@ -69,12 +74,12 @@ tokenizer, text_encoder = prepare_text_embedding(device=device)
 
 # ================ Pytorch Ligthning Training Module ===========
 class LigthningPipeline(pl.LightningModule):
-    def __init__(self, model_name, to_samples, to_sample_keys, lr, device, batch_size, **kwargs):
+    def __init__(self, model_name, to_samples, to_sample_keys, learning_rate, device, batch_size, **kwargs):
         super().__init__()
         self.save_hyperparameters()
 
-        self.learning_rate = lr
-        self.device = device
+        self.learning_rate = learning_rate
+        # self.device = device
         self.batch_size = batch_size
 
         self.model_name = model_name
@@ -144,5 +149,5 @@ model = LigthningPipeline(model_name=model_name, learning_rate=learning_rate, ba
 wandb_logger.watch(model)
 
 # Lightning Trainer for Easy Pipeline Constructing
-trainer = pl.Trainer(max_epochs=epochs, gpus=1, default_root_dir=checkpoint_dir)
+trainer = pl.Trainer(max_epochs=epochs, accelerator="gpu", devices=1, default_root_dir=checkpoint_dir)
 trainer.fit(model, train_loader, eval_loader)

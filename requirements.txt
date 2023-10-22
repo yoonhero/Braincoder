@@ -11,3 +11,5 @@ tqdm
 pytorch_lightning 
 h5py
 PyYAML
+einops
+wandb

@@ -62,7 +62,7 @@ class SE(nn.Module):
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         # rank reduction for feature extraction(?)
         self.fc = nn.Sequential(
-            nn.Linear(oup, int(int * expansion), bias=False),
+            nn.Linear(oup, int(inp * expansion), bias=False),
             nn.GELU(),
             nn.Linear(int(inp * expansion), oup, bias=False),
             nn.Sigmoid()
