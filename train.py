@@ -4,6 +4,8 @@ import torch.nn.functional as F
 # from torchmetrics impt functional as FM
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
+import wandb
+import tqdm
 
 from argparse import ArgumentParser
 import os
@@ -50,6 +52,8 @@ image_dir = exp_cfg["image_dir"]
 
 num_to_samples = exp_cfg["num_to_samples"]
 
+valid_term = 1
+
 print(cfg)
 
 # =================== DATASET LOADING =====================
@@ -66,13 +70,56 @@ print(to_samples_keys)
 #to_sample = next(iter(eval_loader))
 
 # ================== LOGGER =================
-wandb_logger = WandbLogger(project="braincoder")
+# wandb_logger = WandbLogger(project="braincoder")
+run = wandb.init(
+  project=exp_cfg["name"],
+  config={**model_cfg,**exp_cfg}
+)
 
 
 # ------------------ Prepare DIFFUSION GUYS ---------------------
 # vae, unet, scheduler = prepare_diffuser(device=device)
 # tokenizer, text_encoder = prepare_text_embedding(device=device)
 
+
+# ---------------- VANILLA TRaining LOOP --------------------
+model = models[model_name].from_cfg(model_cfg).to(device)
+wandb.watch(model, log="all")
+
+def loss_term(y, y_hat):
+    l2_loss = F.mse_loss(y_hat, y)
+    kl_loss = F.kl_div(F.softmax(y_hat), F.softmax(y))
+    loss = alpha*l2_loss + (1-alpha)*kl_loss
+
+    return loss
+
+def train():
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, betas=(b1, b2))
+
+    for epoch in epochs:
+        # Main Training
+        _loss = []
+        for step, batch in enumerate(tqdm.tqdm(train_loader)):
+            x, y, _ = batch
+            yhat = model(x)
+            loss = loss_term(y, yhat)
+            loss.backward()
+            optimizer.step()
+            _loss.append(loss.item())
+
+        run.log({"train/loss": _loss.sum() / len(_loss)})
+        
+        if step % valid_term == 0:
+            _loss = []
+            for batch in eval_loader:
+                x, y, _ = batch
+                yhat = model(x)
+                loss = loss_term(y, yhat)
+                _loss.append(loss.item())
+
+            run.log({"val/loss": _loss.sum() / len(_loss)})
+
+        torch.save(model.state_dict(), f"{checkpoint_dir}/{epoch}.pt")
 
 # ================ Pytorch Ligthning Training Module ===========
 class LigthningPipeline(pl.LightningModule):
@@ -146,11 +193,11 @@ class LigthningPipeline(pl.LightningModule):
     #     wandb_logger.log_image(key="samples", images=images, caption=self.to_sample_keys)
 
 
-model = LigthningPipeline(model_name=model_name, learning_rate=learning_rate, batch_size=batch_size, to_samples=to_samples, to_sample_keys=to_samples_keys, device=device, alpha=alpha, cfg=model_cfg)
+# model = LigthningPipeline(model_name=model_name, learning_rate=learning_rate, batch_size=batch_size, to_samples=to_samples, to_sample_keys=to_samples_keys, device=device, alpha=alpha, cfg=model_cfg)
 
 # Logging Gradient
-wandb_logger.watch(model)
+# wandb_logger.watch(model)
 
 # Lightning Trainer for Easy Pipeline Constructing
-trainer = pl.Trainer(max_epochs=epochs, accelerator="gpu", devices=1, default_root_dir=checkpoint_dir, num_sanity_val_steps=0, enable_progress_bar=True)
-trainer.fit(model, train_loader, eval_loader)
+# trainer = pl.Trainer(max_epochs=epochs, accelerator="gpu", devices=1, default_root_dir=checkpoint_dir, num_sanity_val_steps=0, enable_progress_bar=True)
+# trainer.fit(model, train_loader, eval_loader)

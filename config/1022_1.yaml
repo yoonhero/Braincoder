@@ -19,6 +19,7 @@ model:
     - T
 
 exp:
+  name: 1022_1
   learning_rate: 0.001
   batch_size: 32
   epochs: 20
