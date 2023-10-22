@@ -104,7 +104,7 @@ class MBConv(nn.Module):
     def forward(self, x):
         # downsamplling
         if self.downsample:
-            return self.proj(self.pool(x) + self.conv(x))
+            return self.proj(self.pool(x)) + self.conv(x)
         
         # residual connection
         return x + self.conv(x)
@@ -123,7 +123,7 @@ class Attention(nn.Module):
 
         # paramter table of relative position bias
         self.relative_bias_table = nn.Parameter(
-            torch.zeros(((2*self.ih-1)*(2*self.iw-1), heads)),
+            torch.zeros((2*self.ih-1)*(2*self.iw-1), heads),
         )
 
         coords = torch.meshgrid((torch.arange(self.ih), torch.arange(self.iw)))
@@ -156,7 +156,7 @@ class Attention(nn.Module):
         dots = torch.matmul(q, k.transpose(-1, -2)) * self.scale
 
         # User "gather" for more efficiency on GPUs
-        relative_bias = self.relative_bias_table.expand(
+        relative_bias = self.relative_bias_table.gather(
             0, self.relative_index.repeat(1, self.heads)
         )
         relative_bias = rearrange(
@@ -213,7 +213,7 @@ class Transformer(nn.Module):
 
     def forward(self, x):
         if self.downsample:
-            x = self.proj(self.pool1(x)) + self.attn(self.poo2(x))
+            x = self.proj(self.pool1(x)) + self.attn(self.pool2(x))
         else:
             x = x + self.attn(x)
         x = x + self.ff(x)
@@ -222,7 +222,7 @@ class Transformer(nn.Module):
 
 class CoAtNet(nn.Module):
     CLIP_SHAPE = (77, 768)
-    def __init__(self, image_shape, initial_channel, num_blocks, channels, block_type=["C", "C", "T", "T"]):
+    def __init__(self, image_shape, num_blocks, channels, block_type=["C", "C", "T", "T"]):
         super().__init__()
 
         ih, iw = image_shape
@@ -231,19 +231,19 @@ class CoAtNet(nn.Module):
         block = {"C": MBConv, "T": Transformer}
 
         # Reduce image size into half
-        self.s0 = self._make_layer(conv_3x3_bn, initial_channel, channels[0], num_blocks[0], (iw//2, ih//2))
+        # self.s0 = self._make_layer(conv_3x3_bn, initial_channel, channels[0], num_blocks[0], (ih//2, iw//2))
 
         self.layers = nn.ModuleList([])
         for i in range(4):
-            _image_shape = (ih // ((i+2)**2), iw // ((i+2)**2))
-            _s = self._make_layer(block[block_type[i]], channels[i], channels[i+1], num_blocks[i+1], _image_shape)
+            _image_shape = (ih // (2**(i+1)), iw // (2**(i+1)))
+            _s = self._make_layer(block[block_type[i]], channels[i], channels[i+1], num_blocks[i], _image_shape)
             self.layers.append(_s)
     
         # I think pooling is unnecessary step for guessing the CLIP zz
         # self.pool = nn.AvgPool2d(ih // 32, 1)
 
         # out = CoAtNet.CLIP_SHAPE[0] * CoAtNet.CLIP_SHAPE[1]
-        out = (ih // 32) * (iw // 32)
+        out = (ih // 16) * (iw // 16)
         self.proj = nn.Sequential(
             Rearrange("b c ih iw -> b c (ih iw)"),
             nn.Linear(out, CoAtNet.CLIP_SHAPE[0]), 
@@ -251,7 +251,7 @@ class CoAtNet(nn.Module):
         )
 
     def forward(self, x):
-        x = self.s0(x)
+        # x = self.s0(x)
         for s in self.layers:
             x = s(x)
         x = self.proj(x)
@@ -268,4 +268,13 @@ class CoAtNet(nn.Module):
 
     @classmethod
     def from_cfg(cls, cfg):
-        return cls(cfg["image_shape"], cfg["channels"][0], cfg["num_blocks"], cfg["channels"][1:], cfg["block_type"])
+        return cls(cfg["image_shape"], cfg["num_blocks"], cfg["channels"], cfg["block_type"])
+
+
+if __name__ == "__main__":
+    from utils import read_config
+    cfg = read_config("./config/exp_config.yaml")
+    network = CoAtNet.from_cfg(cfg["model"])
+
+    a = torch.zeros((1, 42, 320, 240))
+    network(a)
