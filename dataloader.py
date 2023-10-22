@@ -130,7 +130,8 @@ def create_dataloader(batch_size, image_dir, cache_dir, device, seed=1234):
     train_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./train_dataset.json", image_dir, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
     eval_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./eval_dataset.json", image_dir, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
 
-    trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=G, num_workers=4)
+    torch.multiprocessing.set_start_method('spawn')
+    trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=G, num_workers=1)
     evalloader = DataLoader(eval_dataset, batch_size=batch_size, shuffle=False, generator=G, num_workers=1)
 
     return trainloader, evalloader
