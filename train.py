@@ -109,14 +109,14 @@ class LigthningPipeline(pl.LightningModule):
         return loss
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
+        x, y, _ = batch
         y_hat = self(x)
         loss = self.loss_term(y_hat, y)
         self.log({"train/loss", loss})
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
+        x, y, _ = batch
         logits = self(x)
         loss = F.l1_loss(logits, y)
         #metrics = {'test_loss': loss}

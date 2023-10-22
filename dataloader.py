@@ -59,7 +59,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
             
             _sorted_spec = sorted(_spec, key=_sort_key)
             # change image directory for loading in various environment.
-            _cleaned_spec = map(lambda x: f"{image_dir}/{x.split('/')[-1]}", _sorted_spec)
+            _cleaned_spec = list(map(lambda x: f"{image_dir}/{x.split('/')[-1]}", _sorted_spec))
             data_row = (d["id"], _cleaned_spec, d["caption"])
 
             dataset.append(data_row)
