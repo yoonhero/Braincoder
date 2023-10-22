@@ -103,6 +103,7 @@ def train():
             x, y, _ = batch
             yhat = model(x)
             loss = loss_term(y, yhat)
+            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             _loss.append(loss.item())
