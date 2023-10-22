@@ -103,17 +103,15 @@ def train():
         _loss = []
         for step, batch in enumerate(tqdm.tqdm(train_loader)):
             x, y, _ = batch
-            start = time.time()
             yhat = model(x)
-            print(f"bottleneck? {time.time() - start}")
 
             loss = loss_term(y, yhat)
             loss.backward()
             optimizer.step()
             optimizer.zero_grad(set_to_none=True)
-            _loss.append(loss.cpu().detach().item())
-
-        run.log({"train/loss": _loss.sum() / len(_loss)})
+        # _loss.append(loss.cpu().detach().item())
+        # run.log({"train/loss": _loss.sum() / len(_loss)})
+        run.log({"train/loss": loss.item()})
         
         if step % valid_term == 0:
             _loss = []
