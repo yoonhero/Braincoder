@@ -111,7 +111,7 @@ def train():
             optimizer.zero_grad(set_to_none=True)
         # _loss.append(loss.cpu().detach().item())
         # run.log({"train/loss": _loss.sum() / len(_loss)})
-        run.log({"train/loss": loss.item()})
+        run.log({"train/loss": loss.cpu().detach().item()})
         
         if step % valid_term == 0:
             _loss = []
