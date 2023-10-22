@@ -43,7 +43,8 @@ b1, b2 = exp_cfg["betas"]
 
 cache_dir = exp_cfg["cache_dir"]
 checkpoint_dir = exp_cfg["checkpoint_dir"]
-os.mkdir(checkpoint_dir)
+# os.mkdir(checkpoint_dir)
+os.makedirs(checkpoint_dir, exist_ok=True)
 image_dir = exp_cfg["image_dir"]
 
 num_to_samples = exp_cfg["num_to_samples"]
