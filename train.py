@@ -42,6 +42,11 @@ learning_rate = exp_cfg["learning_rate"]
 batch_size = exp_cfg["batch_size"]
 epochs = exp_cfg["epochs"]
 
+try:
+    grad_accum = exp_cfg["grad_accum"]
+except: 
+    grad_accum = 1
+
 b1, b2 = exp_cfg["betas"]
 alpha = exp_cfg["alpha"]
 
@@ -52,6 +57,11 @@ os.makedirs(checkpoint_dir, exist_ok=True)
 image_dir = exp_cfg["image_dir"]
 
 num_to_samples = exp_cfg["num_to_samples"]
+how_many_to_save = exp_cfg["how_many_to_save"]
+
+metrics = exp_cfg["metrics"]
+
+exp_name = exp_cfg["exp_name"]
 
 valid_term = 1
 
@@ -90,9 +100,14 @@ compiled_model = torch.compile(model)
 # wandb.watch(model, log="gradients")
 
 def loss_term(y, y_hat):
-    l2_loss = F.mse_loss(y_hat, y)
-    kl_loss = F.kl_div(F.softmax(y_hat), F.softmax(y))
-    loss = alpha*l2_loss + (1-alpha)*kl_loss
+    # Base LOSS will be L2
+    loss = alpha*F.mse_loss(y_hat, y)
+
+    if "kl" in metrics:
+        loss = loss + (1-alpha)*F.kl_div(F.softmax(y_hat), F.softmax(y))
+    elif "contrastive" in metrics:
+        # loss = loss + (1-alpha)*
+        pass
 
     return loss
 
@@ -107,25 +122,40 @@ def train():
             yhat = compiled_model(x)
 
             loss = loss_term(y, yhat)
+
             loss.backward()
-            optimizer.step()
-            optimizer.zero_grad(set_to_none=True)
+
+            # Gradient Accumulation hahahahahahahahahahhaha I need just A100 
+            if (step+1)%grad_accum==0:
+                optimizer.step()
+                optimizer.zero_grad(set_to_none=True)
         # _loss.append(loss.cpu().detach().item())
         # run.log({"train/loss": _loss.sum() / len(_loss)})
         run.log({"train/loss": loss.cpu().detach().item()})
         
-        if step % valid_term == 0:
+        if epoch % valid_term == 0:
             with torch.no_grad():
                 _loss = []
                 for batch in eval_loader:
-                    x, y, _ = batch
+                    x, y, im_keys = batch
                     yhat = model(x)
                     loss = loss_term(y, yhat)
+                    
+                    # Saving sample for visualizing the result
+                    for i in range(how_many_to_save):
+                        pred = yhat[i].cpu().detach()
+                        im_key = im_keys[i].item()
+                        filename = f"{checkpoint_dir}/{exp_name}/sample-{epoch}-{im_key}.pt"
+                        torch.save(pred, filename)
+
+                    # yhat, im_keys
                     _loss.append(loss.cpu().detach().item())
 
-                run.log({"val/loss": _loss.sum() / len(_loss)})
+                run.log({"val/loss": sum(_loss) / len(_loss)})
 
-        torch.save(model.state_dict(), f"{checkpoint_dir}/{epoch}.pt")
+        torch.save(model.state_dict(), f"{checkpoint_dir}/{exp_name}/{epoch}.pt")
+    
+
 
 train()
 

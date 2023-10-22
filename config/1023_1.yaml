@@ -19,18 +19,18 @@ model:
     - T
 
 exp:
-  exp_name: 1022_1
-  learning_rate: 0.001
-  grad_accu: 1
+  exp_name: 1023_1
+  learning_rate: 0.0003
+  grad_accu: 5
   batch_size: 10
   epochs: 20
-  betas: [0.95, 0.99]
+  betas: [0.96, 0.99]
   alpha: 0.7
   cache_dir: "/content/drive/MyDrive/brainstormers/cache.hdf5"
   checkpoint_dir: "/content/drive/MyDrive/brainstormers/231022"
   image_dir: "/content/dataset"
   num_to_samples: 5
-  how_many_to_save: 1
+  how_many_to_save: 5
 
   metrics:
     - l2
