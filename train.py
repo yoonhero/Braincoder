@@ -72,7 +72,7 @@ print(to_samples_keys)
 # ================== LOGGER =================
 # wandb_logger = WandbLogger(project="braincoder")
 run = wandb.init(
-  project=exp_cfg["name"],
+  project="braincoder",
   config={**model_cfg,**exp_cfg}
 )
 
