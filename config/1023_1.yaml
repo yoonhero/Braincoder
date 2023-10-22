@@ -27,7 +27,7 @@ exp:
   betas: [0.96, 0.99]
   alpha: 0.7
   cache_dir: "/content/drive/MyDrive/brainstormers/cache.hdf5"
-  checkpoint_dir: "/content/drive/MyDrive/brainstormers/231022"
+  checkpoint_dir: "/content/drive/MyDrive/brainstormers/231023"
   image_dir: "/content/dataset"
   num_to_samples: 5
   how_many_to_save: 5

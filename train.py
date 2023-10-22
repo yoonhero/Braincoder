@@ -10,6 +10,7 @@ import tqdm
 from argparse import ArgumentParser
 import os
 import time
+from pathlib import Path
 
 from model import LinearModel, CoAtNet
 from dataloader import create_dataloader
@@ -53,7 +54,7 @@ alpha = exp_cfg["alpha"]
 cache_dir = exp_cfg["cache_dir"]
 checkpoint_dir = exp_cfg["checkpoint_dir"]
 # os.mkdir(checkpoint_dir)
-os.makedirs(checkpoint_dir, exist_ok=True)
+# os.makedirs(checkpoint_dir, exist_ok=True)
 image_dir = exp_cfg["image_dir"]
 
 num_to_samples = exp_cfg["num_to_samples"]
@@ -62,6 +63,7 @@ how_many_to_save = exp_cfg["how_many_to_save"]
 metrics = exp_cfg["metrics"]
 
 exp_name = exp_cfg["exp_name"]
+Path(checkpoint_dir/exp_name).mkdir(exist_ok=True)
 
 valid_term = 1
 
