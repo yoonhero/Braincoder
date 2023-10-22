@@ -96,7 +96,7 @@ def loss_term(y, y_hat):
 def train():
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, betas=(b1, b2))
 
-    for epoch in epochs:
+    for epoch in range(epochs):
         # Main Training
         _loss = []
         for step, batch in enumerate(tqdm.tqdm(train_loader)):
