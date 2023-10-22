@@ -57,7 +57,7 @@ train_loader, eval_loader = create_dataloader(batch_size=batch_size, cache_dir=c
 to_samples = []
 to_samples_keys = []
 # for i in range(num_to_samples):
-temp, key = next(iter(eval_loader))
+temp, _, key = next(iter(eval_loader))
 to_samples = temp[:num_to_samples].to("cpu")
 to_samples_keys = key[:num_to_samples]
 print(to_samples_keys)
