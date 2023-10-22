@@ -63,7 +63,7 @@ how_many_to_save = exp_cfg["how_many_to_save"]
 metrics = exp_cfg["metrics"]
 
 exp_name = exp_cfg["exp_name"]
-Path(checkpoint_dir/exp_name).mkdir(exist_ok=True)
+Path(checkpoint_dir/str(exp_name)).mkdir(exist_ok=True)
 
 valid_term = 1
 
