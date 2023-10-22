@@ -21,7 +21,7 @@ model:
     - T
 
 exp:
-  learning_rate: 1.0e-3
+  learning_rate: 0.001
   batch_size: 64
   epochs: 20
   betas: [0.95, 0.99]
