@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 # from torchmetrics impt functional as FM
 import pytorch_lightning as pl
-from lightning.pytorch.loggers import WandbLogger
+from pytorch_lightning.loggers import WandbLogger
 
 from argparse import ArgumentParser
 import os
