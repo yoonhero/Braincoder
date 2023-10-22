@@ -121,6 +121,8 @@ def train():
 
         torch.save(model.state_dict(), f"{checkpoint_dir}/{epoch}.pt")
 
+train()
+
 # ================ Pytorch Ligthning Training Module ===========
 class LigthningPipeline(pl.LightningModule):
     def __init__(self, model_name, to_samples, to_sample_keys, learning_rate, device, batch_size, alpha, **kwargs):
