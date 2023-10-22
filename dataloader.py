@@ -83,7 +83,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
             _, y = text2emb(caption, self.tokenizer, self.text_encoder, self.device)
         else:
             y = self.get_emb_from_cache(im_id)
-            y = torch.from_numpy(y[:]).to(self.device)
+            y = torch.from_numpy(y[:]).squeeze(0).to(self.device)
 
         return x, y, im_id
 

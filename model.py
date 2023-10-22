@@ -271,6 +271,37 @@ class CoAtNet(nn.Module):
         return cls(cfg["image_shape"], cfg["num_blocks"], cfg["channels"], cfg["block_type"])
 
 
+# ViTGPT(?)
+class MAE(nn.Module):
+    def __init__(self, image_shape, channels):
+        self.ih, self.iw = image_shape
+
+        # patch embedder using conv's characteristic
+        self.patch = nn.Conv2d(42, channels[0], 3, 3, 0)
+
+        self.blocks = nn.ModuleList([])
+        for inp, oup in zip(channels, channels[1:]):
+            layer = self._make_block(inp, oup, image_shape)
+
+    def _make_block(self, inp, oup, image_shape):
+        block = nn.ModuleList([])
+
+        attn = Attention(inp, oup, image_shape, heads=8, dim_head=32)
+        ff = FeedForward()
+
+        attn = nn.Sequential(
+            Rearrange("b c ih iw -> b (ih iw) c"),
+            PreNorm(inp, attn, nn.BatchNorm2d),
+            Rearrange("b (ih iw) c -> b c ih iw", ih=self.ih, iw=self.iw)
+        )
+
+        ff = nn.Sequential(
+            Rearrange("b c ih iw ->")
+        )
+
+        return nn.Sequential(*block)
+
+
 if __name__ == "__main__":
     from utils import read_config
     cfg = read_config("./config/exp_config.yaml")

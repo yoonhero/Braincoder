@@ -108,12 +108,12 @@ class LigthningPipeline(pl.LightningModule):
         kl_loss = self.criterion(F.softmax(y_hat), F.softmax(y))
         loss = self.alpha*l2_loss + (1-self.alpha)*kl_loss
 
-        return loss
+        return loss.item()
 
     def training_step(self, batch, batch_idx):
         x, y, _ = batch
         y_hat = self(x)
-        loss = self.loss_term(y_hat, y).cpu().detach().item()
+        loss = self.loss_term(y_hat, y)
         self.log("train/loss", loss)
         return loss
 
@@ -152,5 +152,5 @@ model = LigthningPipeline(model_name=model_name, learning_rate=learning_rate, ba
 wandb_logger.watch(model)
 
 # Lightning Trainer for Easy Pipeline Constructing
-trainer = pl.Trainer(max_epochs=epochs, accelerator="gpu", devices=1, default_root_dir=checkpoint_dir)
+trainer = pl.Trainer(max_epochs=epochs, accelerator="gpu", devices=1, default_root_dir=checkpoint_dir, num_sanity_val_steps=0, enable_progress_bar=True)
 trainer.fit(model, train_loader, eval_loader)
