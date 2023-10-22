@@ -70,8 +70,8 @@ wandb_logger = WandbLogger(project="braincoder")
 
 
 # ------------------ Prepare DIFFUSION GUYS ---------------------
-vae, unet, scheduler = prepare_diffuser(device=device)
-tokenizer, text_encoder = prepare_text_embedding(device=device)
+# vae, unet, scheduler = prepare_diffuser(device=device)
+# tokenizer, text_encoder = prepare_text_embedding(device=device)
 
 
 # ================ Pytorch Ligthning Training Module ===========
@@ -104,9 +104,9 @@ class LigthningPipeline(pl.LightningModule):
         return self.model(x)
 
     def loss_term(self, y_hat, y):
-        l1_loss = F.l1_loss(y_hat, y)
+        l2_loss = F.mse_loss(y_hat, y)
         kl_loss = self.criterion(F.softmax(y_hat), F.softmax(y))
-        loss = self.alpha*l1_loss + (1-self.alpha)*kl_loss
+        loss = self.alpha*l2_loss + (1-self.alpha)*kl_loss
 
         return loss
 
@@ -120,7 +120,7 @@ class LigthningPipeline(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, y, _ = batch
         logits = self(x)
-        loss = F.l1_loss(logits, y)
+        loss = F.mse_loss(logits, y)
         #metrics = {'test_loss': loss}
         #self.log_dict(metrics)    
         self.log("test/loss", loss)
@@ -138,12 +138,12 @@ class LigthningPipeline(pl.LightningModule):
 
         return torch.optim.Adam(param, lr=self.learning_rate, betas=(b1, b2))
 
-    def on_epoch_end(self):
-        z = self.model(self.to_samples)
+    # def on_epoch_end(self):
+    #     z = self.model(self.to_samples)
 
-        images = self.diffuse_with_braincoder_emb(z)
+    #     images = self.diffuse_with_braincoder_emb(z)
 
-        wandb_logger.log_image(key="samples", images=images, caption=self.to_sample_keys)
+    #     wandb_logger.log_image(key="samples", images=images, caption=self.to_sample_keys)
 
 
 model = LigthningPipeline(model_name=model_name, learning_rate=learning_rate, batch_size=batch_size, to_samples=to_samples, to_sample_keys=to_samples_keys, device=device, alpha=alpha, cfg=model_cfg)
