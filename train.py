@@ -85,7 +85,8 @@ run = wandb.init(
 
 # ---------------- VANILLA TRaining LOOP --------------------
 model = models[model_name].from_cfg(model_cfg).to(device)
-wandb.watch(model, log="gradients")
+# are you criminal?
+# wandb.watch(model, log="gradients")
 
 def loss_term(y, y_hat):
     l2_loss = F.mse_loss(y_hat, y)
@@ -101,11 +102,11 @@ def train():
         # Main Training
         _loss = []
         for step, batch in enumerate(tqdm.tqdm(train_loader)):
-            start = time.time()
             x, y, _ = batch
-            print(f"bottleneck? {time.time() - start}")
-            
+            start = time.time()
             yhat = model(x)
+            print(f"bottleneck? {time.time() - start}")
+
             loss = loss_term(y, yhat)
             optimizer.zero_grad()
             loss.backward()
