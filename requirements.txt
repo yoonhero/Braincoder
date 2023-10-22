@@ -13,3 +13,4 @@ h5py
 PyYAML
 einops
 wandb
+accelerate

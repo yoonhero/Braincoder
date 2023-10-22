@@ -84,7 +84,7 @@ class LigthningPipeline(pl.LightningModule):
         self.batch_size = batch_size
 
         self.model_name = model_name
-        self.model = models[model_name](**kwargs)
+        self.model = models[model_name].from_cfg(**kwargs)
 
         self.criterion = nn.KLDivLoss(reduction="batchmean")
 
