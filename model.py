@@ -76,7 +76,7 @@ class SE(nn.Module):
         return x * y
 
 class MBConv(nn.Module):
-    def __init__(self, inp, oup, image_shape, downsample=False):
+    def __init__(self, inp, oup, image_shape, downsample=False, **kwargs):
         super().__init__()
         self.downsample = downsample
         stride = 1 if self.downsample == False else 2
