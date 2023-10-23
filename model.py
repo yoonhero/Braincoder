@@ -284,7 +284,7 @@ class CoAtNet(nn.Module):
             # print(mn)
             if mn.endswith("bias"):
                 no_decay.add(mn)
-            if mn.endswith("weight") and isinstance(m, whitelist_weight_modules):
+            elif mn.endswith("weight") and isinstance(m, whitelist_weight_modules):
                 decay.add(mn)
             elif mn.endswith("weight") and isinstance(m, blacklist_weight_modules):
                 no_decay.add(mn)
