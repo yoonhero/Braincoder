@@ -151,7 +151,7 @@ def train():
                 
         # _loss.append(loss.cpu().detach().item())
         # run.log({"train/loss": _loss.sum() / len(_loss)})
-        run.log({"train/loss": sum(_loss) / len(_loss), "epoch": epoch})
+        run.log({"train/loss": sum(_loss) / len(_loss)})
         
         if epoch % valid_term == 0:
             with torch.no_grad():
@@ -164,6 +164,7 @@ def train():
 
                 # Saving sample for visualizing the result
                 for i in range(how_many_to_save):
+                    print(yhat.shape)
                     if i<yhat.shape[0]:
                         continue
                     pred = yhat[i].cpu().detach()
@@ -171,7 +172,7 @@ def train():
                     filename = f"{checkpoint_dir}/{exp_name}/sample-{epoch}-{im_key}.pt"
                     torch.save(pred, filename)
 
-                run.log({"val/loss": sum(_loss) / len(_loss), "epoch": epoch})
+                run.log({"val/loss": sum(_loss) / len(_loss)})
 
         torch.save(model.state_dict(), f"{checkpoint_dir}/{exp_name}/epoch-{epoch}.pt")
     
