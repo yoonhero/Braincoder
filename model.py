@@ -275,7 +275,7 @@ class CoAtNet(nn.Module):
                 layers.append(block(oup, oup, image_size))
         return nn.Sequential(*layers)
     
-    def get_parameter(self, weight_decay):
+    def get_parameters(self, weight_decay):
         decay = set()
         no_decay = set()
         whitelist_weight_modules = (torch.nn.Linear, )

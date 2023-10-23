@@ -34,7 +34,7 @@ exp:
 
   metrics:
     - l2
-    - cross_en
+    - kl
   optimizer: "AdamW"
   weight_decay: 0.01
   grad_clip: 1.0
