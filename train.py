@@ -164,6 +164,8 @@ def train():
 
                 # Saving sample for visualizing the result
                 for i in range(how_many_to_save):
+                    if i<yhat.shape[0]:
+                        continue
                     pred = yhat[i].cpu().detach()
                     im_key = im_keys[i].item()
                     filename = f"{checkpoint_dir}/{exp_name}/sample-{epoch}-{im_key}.pt"
