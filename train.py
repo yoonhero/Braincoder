@@ -158,6 +158,7 @@ def train():
                 _loss = []
                 for batch in eval_loader:
                     x, y, im_keys = batch
+                    print(x.shape)
                     yhat = model(x)
                     loss = loss_term(y, yhat)
                     _loss.append(loss.cpu().detach().item())
@@ -165,7 +166,7 @@ def train():
                 # Saving sample for visualizing the result
                 for i in range(how_many_to_save):
                     print(yhat.shape)
-                    if i>yhat.shape[0]:
+                    if i>=yhat.shape[0]:
                         continue
                     pred = yhat[i].cpu().detach()
                     im_key = im_keys[i].item()
