@@ -21,15 +21,15 @@ model:
   dropout: 0.0
 
 exp:
-  exp_name: "1023_2"
+  exp_name: "1024_1"
   learning_rate: 0.005
   grad_accu: 6
   batch_size: 10
-  epochs: 20
+  epochs: 40
   betas: [0.96, 0.98]
   alpha: 0.7
   cache_dir: "/content/drive/MyDrive/brainstormers/cache.hdf5"
-  checkpoint_dir: "/content/drive/MyDrive/brainstormers/231023"
+  checkpoint_dir: "/content/drive/MyDrive/brainstormers/231024"
   image_dir: "/content/dataset"
   num_to_samples: 5
   how_many_to_save: 5
