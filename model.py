@@ -315,7 +315,7 @@ class CoAtNet(nn.Module):
             if module.bias is not None:
                 torch.nn.init.zeros_(module.bias)
 
-    def num_paramters(self):
+    def num_parameters(self):
         return sum([p.nelement() for p in self.parameters()])
 
     @classmethod
