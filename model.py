@@ -223,7 +223,7 @@ class Transformer(nn.Module):
 
 class CoAtNet(nn.Module):
     CLIP_SHAPE = (77, 768)
-    def __init__(self, image_shape, num_blocks, channels, block_type=["C", "C", "T", "T"], training=True):
+    def __init__(self, image_shape, num_blocks, channels, block_type=["C", "C", "T", "T"], dropout=0., training=True):
         super().__init__()
 
         ih, iw = image_shape
@@ -237,7 +237,7 @@ class CoAtNet(nn.Module):
         self.layers = nn.ModuleList([])
         for i in range(4):
             _image_shape = (ih // (2**(i+1)), iw // (2**(i+1)))
-            _s = self._make_layer(block[block_type[i]], channels[i], channels[i+1], num_blocks[i], _image_shape)
+            _s = self._make_layer(block[block_type[i]], channels[i], channels[i+1], num_blocks[i], _image_shape, dropout=dropout)
             self.layers.append(_s)
     
         # I think pooling is unnecessary step for guessing the CLIP zz
@@ -266,13 +266,13 @@ class CoAtNet(nn.Module):
         x = self.proj(x)
         return x
 
-    def _make_layer(self, block, inp, oup, depth, image_size):
+    def _make_layer(self, block, inp, oup, depth, image_size, **kwargs):
         layers = nn.ModuleList([])
         for d in range(depth):
             if d == 0:
-                layers.append(block(inp, oup, image_size, downsample=True))
+                layers.append(block(inp, oup, image_size, downsample=True, **kwargs))
             else:
-                layers.append(block(oup, oup, image_size))
+                layers.append(block(oup, oup, image_size, **kwargs))
         return nn.Sequential(*layers)
     
     def get_parameters(self, weight_decay):
@@ -320,7 +320,7 @@ class CoAtNet(nn.Module):
 
     @classmethod
     def from_cfg(cls, cfg):
-        return cls(cfg["image_shape"], cfg["num_blocks"], cfg["channels"], cfg["block_type"])
+        return cls(cfg["image_shape"], cfg["num_blocks"], cfg["channels"], cfg["block_type"], dropout=cfg["dropout"])
 
     @classmethod
     def from_trained(cls, cfg, path):
