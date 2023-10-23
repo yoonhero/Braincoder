@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from einops import rearrange
 from einops.layers.torch import Rearrange
 import yaml
+import math
 
 class LinearModel(nn.Module):
     def __init__(self, eeg_channels, w=640, h=480, channels=3, hidden=[]):
@@ -222,7 +223,7 @@ class Transformer(nn.Module):
 
 class CoAtNet(nn.Module):
     CLIP_SHAPE = (77, 768)
-    def __init__(self, image_shape, num_blocks, channels, block_type=["C", "C", "T", "T"]):
+    def __init__(self, image_shape, num_blocks, channels, block_type=["C", "C", "T", "T"], training=True):
         super().__init__()
 
         ih, iw = image_shape
@@ -250,6 +251,14 @@ class CoAtNet(nn.Module):
             Rearrange("b c i -> b i c")
         )
 
+        if training:
+            self.apply(self._init_weights)
+            
+            for pn, p in self.named_parameters():
+                if pn.endswith('proj.1.weight'):
+                    torch.nn.init.normal_(p, mean=0.0, std=0.02/math.sqrt(sum(num_blocks)))
+
+
     def forward(self, x):
         # x = self.s0(x)
         for s in self.layers:
@@ -265,11 +274,61 @@ class CoAtNet(nn.Module):
             else:
                 layers.append(block(oup, oup, image_size))
         return nn.Sequential(*layers)
+    
+    def get_parameter(self, weight_decay):
+        decay = set()
+        no_decay = set()
+        whitelist_weight_modules = (torch.nn.Linear, )
+        blacklist_weight_modules = (nn.BatchNorm2d)
+        for mn, m in self.named_parameters():
+            # print(mn)
+            if mn.endswith("bias"):
+                no_decay.add(mn)
+            if mn.endswith("weight") and isinstance(m, whitelist_weight_modules):
+                decay.add(mn)
+            elif mn.endswith("weight") and isinstance(m, blacklist_weight_modules):
+                no_decay.add(mn)
+            else:
+                decay.add(mn)
+
+            # if isinstance(m, nn.Parameter):
+            #     fpn = mn
+            #     print(fpn)
+            #     continue
+
+            # for pn, p in m.named_paramaters():
+            #     fpn = '%s.%s' % (mn, pn) if mn else pn
+            #     print(fpn, pn)
+
+        param_dict = {pn: p for pn, p in self.named_parameters()}
+
+        optim_groups = [
+            {"params": [param_dict[pn] for pn in sorted(list(decay))], "weight_decay": weight_decay},
+            {"params": [param_dict[pn] for pn in sorted(list(no_decay))], "weight_decay": 0.0}
+        ]
+
+        return optim_groups
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+            if module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+
+    def num_paramteres(self):
+        return sum([p.nelement() for p in self.parameters()])
 
     @classmethod
     def from_cfg(cls, cfg):
         return cls(cfg["image_shape"], cfg["num_blocks"], cfg["channels"], cfg["block_type"])
 
+    @classmethod
+    def from_trained(cls, cfg, path):
+        model = cls.from_cfg(cfg)
+        param = torch.load(path)
+        model.load_state_dict(param)
+
+        return model
 
 # ViTGPT(?)
 class MAE(nn.Module):
@@ -306,6 +365,8 @@ if __name__ == "__main__":
     from utils import read_config
     cfg = read_config("./config/exp_config.yaml")
     network = CoAtNet.from_cfg(cfg["model"])
+    network.get_parameter(0.1)
+    print(network.num_paramteres())
 
     a = torch.zeros((1, 42, 320, 240))
     network(a)

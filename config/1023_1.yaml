@@ -19,13 +19,13 @@ model:
     - T
 
 exp:
-  exp_name: 1023_1
+  exp_name: "1023_2"
   learning_rate: 0.0003
-  grad_accu: 5
+  grad_accu: 6
   batch_size: 10
   epochs: 20
-  betas: [0.96, 0.99]
-  alpha: 0.7
+  betas: [0.96, 0.98]
+  alpha: 0.3
   cache_dir: "/content/drive/MyDrive/brainstormers/cache.hdf5"
   checkpoint_dir: "/content/drive/MyDrive/brainstormers/231023"
   image_dir: "/content/dataset"
@@ -34,5 +34,8 @@ exp:
 
   metrics:
     - l2
-    - kl
+    - cross_en
+  optimizer: "AdamW"
+  weight_decay: 0.01
+  grad_clip: 1.0
   log: True

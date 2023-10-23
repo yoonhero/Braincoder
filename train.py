@@ -11,6 +11,7 @@ from argparse import ArgumentParser
 import os
 import time
 from pathlib import Path
+# from dataclasses import Union
 
 from model import LinearModel, CoAtNet
 from dataloader import create_dataloader
@@ -61,8 +62,12 @@ num_to_samples = exp_cfg["num_to_samples"]
 how_many_to_save = exp_cfg["how_many_to_save"]
 
 metrics = exp_cfg["metrics"]
+optimizer_type = exp_cfg["optimizer"]
+weight_decay = exp_cfg["weight_decay"]
+grad_clip = exp_cfg["grad_clip"]
 
 exp_name = exp_cfg["exp_name"]
+Path(checkpoint_dir).mkdir(exist_ok=True)
 (Path(checkpoint_dir)/str(exp_name)).mkdir(exist_ok=True)
 
 valid_term = 1
@@ -84,11 +89,14 @@ print(to_samples_keys)
 
 # ================== LOGGER =================
 # wandb_logger = WandbLogger(project="braincoder")
+model = models[model_name].from_cfg(model_cfg).to(device)
+
+total_parameters = model.num_parameters()
+
 run = wandb.init(
   project="braincoder",
-  config={**model_cfg,**exp_cfg}
+  config={**model_cfg,**exp_cfg, "param": total_parameters}
 )
-
 
 # ------------------ Prepare DIFFUSION GUYS ---------------------
 # vae, unet, scheduler = prepare_diffuser(device=device)
@@ -96,7 +104,6 @@ run = wandb.init(
 
 
 # ---------------- VANILLA TRaining LOOP --------------------
-model = models[model_name].from_cfg(model_cfg).to(device)
 # compiled_model = torch.compile(model)
 # are you criminal?
 # wandb.watch(model, log="gradients")
@@ -110,11 +117,18 @@ def loss_term(y, y_hat):
     elif "contrastive" in metrics:
         # loss = loss + (1-alpha)*
         pass
+    elif "cross_en":
+        loss = loss + (1-alpha)*F.cross_entropy(y_hat, y)
 
     return loss
 
 def train():
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, betas=(b1, b2))
+    if optimizer_type == "Adam":
+        optimizer = torch.optim.Adam(model.get_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, betas=(b1, b2))
+    elif optimizer_type == "AdamW":
+        optimizer = torch.optim.AdamW(model.get_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, betas=(b1, b2))
+    elif optimizer_type == "SGD":
+        optimizer = torch.optim.SGD(model.get_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, momentume=0.9)
 
     for epoch in range(epochs):
         # Main Training
@@ -124,16 +138,20 @@ def train():
             yhat = model(x)
 
             loss = loss_term(y, yhat)
+            loss /= grad_accum
 
             loss.backward()
+            _loss.append(loss.item())
 
             # Gradient Accumulation hahahahahahahahahahhaha I need just A100 
             if (step+1)%grad_accum==0:
+                nn.utils.clip_grad_norm_(model.parameters(), max_norm=grad_clip, norm_type=2)
                 optimizer.step()
                 optimizer.zero_grad(set_to_none=True)
+                
         # _loss.append(loss.cpu().detach().item())
         # run.log({"train/loss": _loss.sum() / len(_loss)})
-        run.log({"train/loss": loss.cpu().detach().item()})
+        run.log({"train/loss": sum(loss) / len(loss), "epoch": epoch})
         
         if epoch % valid_term == 0:
             with torch.no_grad():
@@ -150,12 +168,11 @@ def train():
                         filename = f"{checkpoint_dir}/{exp_name}/sample-{epoch}-{im_key}.pt"
                         torch.save(pred, filename)
 
-                    # yhat, im_keys
                     _loss.append(loss.cpu().detach().item())
 
-                run.log({"val/loss": sum(_loss) / len(_loss)})
+                run.log({"val/loss": sum(_loss) / len(_loss), "epoch": epoch})
 
-        torch.save(model.state_dict(), f"{checkpoint_dir}/{exp_name}/{epoch}.pt")
+        torch.save(model.state_dict(), f"{checkpoint_dir}/{exp_name}/epoch-{epoch}.pt")
     
 
 

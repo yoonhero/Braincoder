@@ -173,3 +173,5 @@ mnist_png
 
 dataset.zip
 cache.hdf5
+
+/tmp
