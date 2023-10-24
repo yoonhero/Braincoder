@@ -23,6 +23,9 @@ def generate(embedding, vae: AutoencoderKL, unet: UNet2DConditionModel, schedule
     )
     latents = latents.to(device)
 
+    B, seq_len, _ = embedding.shape
+    encoder_attention_mask_no_masking = torch.ones((B, seq_len))
+
     for t in tqdm(scheduler.timesteps):
         # expand the latents if we are doing classifier-free guidance to avoid doing two forward passes.
         # for classifier-free guidance process we need to latents this can get better performance.
@@ -32,7 +35,7 @@ def generate(embedding, vae: AutoencoderKL, unet: UNet2DConditionModel, schedule
 
         # predict the noise residual
         with torch.no_grad():
-            noise_pred = unet(latent_model_input, t, encoder_hidden_states=embedding, encoder_attention_mask=False).sample
+            noise_pred = unet(latent_model_input, t, encoder_hidden_states=embedding, encoder_attention_mask=encoder_attention_mask_no_masking).sample
 
         # classifier-free guidance implementation
         noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
