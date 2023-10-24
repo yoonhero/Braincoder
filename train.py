@@ -126,6 +126,10 @@ def loss_term(y, y_hat):
     elif "cross_en":
         cross_loss = F.cross_entropy(y_hat, y)
         loss = mse_loss + (1-alpha)*cross_loss
+    elif "cos":
+        # cos_loss = F.cosine_embedding_loss()
+        cos_loss = 1 - torch.cosine_similarity(y_hat, y, dim=-1).mean()
+        loss = mse_loss + cos_loss
 
     return loss
 

@@ -36,7 +36,7 @@ exp:
 
   metrics:
     - l2
-    - kl
+    - cos
   optimizer: "SGD"
   weight_decay: 0.01
   grad_clip: 1.0
