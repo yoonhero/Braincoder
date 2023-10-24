@@ -65,12 +65,14 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
             dataset.append(data_row)
         self.dataset = dataset
 
-        self.tokenizer, self.text_encoder = prepare_text_embedding(device=device)
+        if not self.from_cache:
+            self.tokenizer, self.text_encoder = prepare_text_embedding(device=device)
         if caching:
             torch.multiprocessing.set_start_method('spawn')
             self.save_caption_emb()
         elif self.from_cache:
             self.load_cache(cache_dir)
+
 
         print(f"Finishing Loading Dataset in {time.time() - start_time_sec}s")
     

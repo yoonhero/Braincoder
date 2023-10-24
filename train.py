@@ -178,7 +178,7 @@ def train():
                         im_key = im_keys[i].item()
                         filename = f"{checkpoint_dir}/{exp_name}/sample-{epoch}-{im_key}.pt"
                         torch.save(pred, filename)
-                        saved+=1
+                        _saved+=1
 
                 run.log({"val/loss": sum(_loss) / len(_loss)})
 
