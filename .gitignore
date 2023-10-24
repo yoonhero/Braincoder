@@ -175,3 +175,6 @@ dataset.zip
 cache.hdf5
 
 /tmp
+
+*.edf
+eval/eeg

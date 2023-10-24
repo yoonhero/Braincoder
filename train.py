@@ -70,12 +70,16 @@ exp_name = exp_cfg["exp_name"]
 Path(checkpoint_dir).mkdir(exist_ok=True)
 (Path(checkpoint_dir)/str(exp_name)).mkdir(exist_ok=True)
 
+seed = exp_cfg["seed"]
+
 valid_term = 1
+
+output_scale = exp_cfg["output_scale"]
 
 print(cfg)
 
 # =================== DATASET LOADING =====================
-train_loader, eval_loader = create_dataloader(batch_size=batch_size, cache_dir=cache_dir, image_dir=image_dir, device=device)
+train_loader, eval_loader = create_dataloader(batch_size=batch_size, cache_dir=cache_dir, scale=output_scale, image_dir=image_dir, device=device, seed=seed)
 
 to_samples = []
 to_samples_keys = []
@@ -110,7 +114,8 @@ run = wandb.init(
 
 def loss_term(y, y_hat):
     # Base LOSS will be L2
-    mse_loss = alpha*F.mse_loss(y_hat, y)
+    # mse_loss = alpha*F.mse_loss(y_hat, y)
+    mse_loss = ((y_hat-y)**2).mean()
 
     if "kl" in metrics:
         # loss = loss + (1-alpha)*F.kl_div(F.softmax(y_hat), F.softmax(y))
@@ -129,7 +134,7 @@ def loss_term(y, y_hat):
     elif "cos":
         # cos_loss = F.cosine_embedding_loss()
         cos_loss = 1 - torch.cosine_similarity(y_hat, y, dim=-1).mean()
-        loss = mse_loss + cos_loss
+        loss = alpha*mse_loss + (1-alpha)*cos_loss
 
     return loss
 

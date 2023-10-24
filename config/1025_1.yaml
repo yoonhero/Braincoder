@@ -33,6 +33,8 @@ exp:
   image_dir: "/content/dataset"
   num_to_samples: 5
   how_many_to_save: 5
+  output_scale: 0.1
+  seed: 1123498
 
   metrics:
     - l2

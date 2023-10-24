@@ -24,12 +24,13 @@ def _sort_key(x):
 
 
 class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
-    def __init__(self, dataset_path, image_dir, device, width=None, height=None, from_cache=False, cache_dir=None, caching=False):
+    def __init__(self, dataset_path, image_dir, scale, device, width=None, height=None, from_cache=False, cache_dir=None, caching=False):
         self.device = device
         self.width = width
         self.height = height 
         self.from_cache = from_cache
         self.image_dir = image_dir
+        self.scale = scale
 
         if width != None and height != None:
             self.transforms = T.Compose([
@@ -88,7 +89,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
             y = torch.from_numpy(y[:]).squeeze(0).to(self.device)
 
         # clip has too large value, so I decide to normalize the vector for efficient predicting.
-        y /= 100
+        y *= self.scale
 
         return x, y, im_id
 
@@ -129,11 +130,11 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
         return len(self.dataset)
 
 
-def create_dataloader(batch_size, image_dir, cache_dir, device, seed=1234):
+def create_dataloader(batch_size, image_dir, scale, cache_dir, device, seed=1234):
     G = torch.Generator()
     G.manual_seed(seed)
-    train_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./train_dataset.json", image_dir, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
-    eval_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./eval_dataset.json", image_dir, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
+    train_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./train_dataset.json", image_dir, scale, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
+    eval_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./eval_dataset.json", image_dir, scale, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
 
     trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=G, num_workers=0)
     evalloader = DataLoader(eval_dataset, batch_size=batch_size, shuffle=False, generator=G, num_workers=0)

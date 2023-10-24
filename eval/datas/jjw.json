@@ -1,0 +1,24 @@
+{
+    "Markers": [
+    ],
+    "connectionType": "dongle",
+    "demographics": {
+        "birthday": "1970-01-01",
+        "countryOfInfluence": {
+            "iso": "",
+            "printable": ""
+        },
+        "countryOfResidence": {
+            "iso": "",
+            "printable": ""
+        },
+        "gender": "U"
+    },
+    "exportApp": "com.emotiv.emotivpro",
+    "exportTime": "2023-10-24T23:37:13.622+09:00",
+    "headsetType": "EPOCX",
+    "mappings": null,
+    "montageType": "UNKNOWN",
+    "recordId": "3f0f4bba-49e5-471b-882c-fbb92a354b53",
+    "user": "yoonhero06"
+}

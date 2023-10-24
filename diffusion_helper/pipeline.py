@@ -101,15 +101,11 @@ def get_emb(brain_embedding, device):
 
     return embeddings
 
-def brain2image1(z, device):
-    vae, unet, scheduler = prepare_diffuser(device)
-
+def brain2image(z, vae, unet, scheduler, device):
     embedding = get_emb(z, device)
-
     generated_images = generate(embedding, vae=vae, unet=unet, scheduler=scheduler, device=device)
 
     del embedding
-
     return generated_images
 
 def brain2image2(z, device):
