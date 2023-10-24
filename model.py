@@ -257,7 +257,7 @@ class CoAtNet(nn.Module):
             for pn, p in self.named_parameters():
                 if pn.endswith('proj.1.weight'):
                     torch.nn.init.normal_(p, mean=0.0, std=0.02/math.sqrt(sum(num_blocks)))
-                    p /= 100
+                    # p /= 100
 
 
     def forward(self, x):
