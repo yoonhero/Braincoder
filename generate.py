@@ -35,6 +35,7 @@ if checkpoint_dir != None:
     network = CoAtNet.from_trained(cfg, checkpoint_dir)
 else:
     embedding = load_emb(embedding_path, device=device)
+    embedding = embedding.unsqueeze(0)
 
 vae, unet, scheduler = prepare_diffuser(device)
 
