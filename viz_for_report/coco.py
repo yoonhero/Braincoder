@@ -84,8 +84,11 @@ class COCO():
 if __name__ == "__main__":
     coco = COCO("./captions_val2014.json")
 
-    print(coco.find_image("000000050403"))
-    print(coco.find_image("000000537802"))
+    # print(coco.find_image("000000050403"))
+    # print(coco.find_image("000000537802"))
+    print(coco.find_image("000000558012"))
+    
+    
     # keys = coco.sample_with_topic("man")
 
     # print(len(keys))

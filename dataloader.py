@@ -85,6 +85,9 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
             y = self.get_emb_from_cache(im_id)
             y = torch.from_numpy(y[:]).squeeze(0).to(self.device)
 
+        # clip has too large value, so I decide to normalize the vector for efficient predicting.
+        y /= 100
+
         return x, y, im_id
 
     def save_caption_emb(self):

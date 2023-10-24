@@ -12,7 +12,6 @@ from diffusion_helper import prepare_diffuser, prepare_text_embedding, text2emb
 def generate(embedding, vae: AutoencoderKL, unet: UNet2DConditionModel, scheduler: LMSDiscreteScheduler, device, num_inference_steps=100, guidance_scale=7.5):
     width, height = 512, 512
     generator = torch.manual_seed(0)    # Seed generator to create the inital latent noise
-    scheduler.set_timesteps(num_inference_steps)
 
     # embedding first dimension could be the double of the prompt list
     batch_size = embedding.shape[0] // 2
@@ -21,7 +20,11 @@ def generate(embedding, vae: AutoencoderKL, unet: UNet2DConditionModel, schedule
         (batch_size, unet.in_channels, height // 8, width // 8),
         generator=generator,
     )
+
     latents = latents.to(device)
+
+    latents = latents * scheduler.init_noise_sigma
+    scheduler.set_timesteps(num_inference_steps)
 
     # B, seq_len, _ = embedding.shape
     # encoder_attention_mask_no_masking = torch.ones((B, seq_len)).to(device)

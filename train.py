@@ -110,15 +110,22 @@ run = wandb.init(
 
 def loss_term(y, y_hat):
     # Base LOSS will be L2
-    loss = alpha*F.mse_loss(y_hat, y)
+    mse_loss = alpha*F.mse_loss(y_hat, y)
 
     if "kl" in metrics:
-        loss = loss + (1-alpha)*F.kl_div(F.softmax(y_hat), F.softmax(y))
+        # loss = loss + (1-alpha)*F.kl_div(F.softmax(y_hat), F.softmax(y))
+        # loss = loss + (1-alpha)*F.kl_div(F.log_softmax(y_hat, 0), F.softmax(y, 0), reduction="none").mean()
+        epsilon = 1e-10
+        q_distribution_clamped = torch.clamp(y_hat, min=epsilon)
+        p_distribution_clamped = torch.clamp(y, min=epsilon)
+        kl_loss = F.kl_div(q_distribution_clamped.log(), p_distribution_clamped, reduction='batchmean')
+        loss = mse_loss + (1-alpha) * kl_loss
     elif "contrastive" in metrics:
         # loss = loss + (1-alpha)*
         pass
     elif "cross_en":
-        loss = loss + (1-alpha)*F.cross_entropy(y_hat, y)
+        cross_loss = F.cross_entropy(y_hat, y)
+        loss = mse_loss + (1-alpha)*cross_loss
 
     return loss
 
@@ -156,25 +163,26 @@ def train():
         if epoch % valid_term == 0:
             with torch.no_grad():
                 _loss = []
+                _saved = 0
                 for batch in eval_loader:
                     x, y, im_keys = batch
                     yhat = model(x)
                     loss = loss_term(y, yhat)
                     _loss.append(loss.cpu().detach().item())
 
-                # Saving sample for visualizing the result
-                for i in range(how_many_to_save):
-                    if i>=yhat.shape[0]:
-                        continue
-                    pred = yhat[i].cpu().detach()
-                    im_key = im_keys[i].item()
-                    filename = f"{checkpoint_dir}/{exp_name}/sample-{epoch}-{im_key}.pt"
-                    torch.save(pred, filename)
+                    # Saving sample for visualizing the result
+                    for i in range(how_many_to_save):
+                        if i>=yhat.shape[0] or _saved >= how_many_to_save:
+                            continue
+                        pred = yhat[i].cpu().detach()
+                        im_key = im_keys[i].item()
+                        filename = f"{checkpoint_dir}/{exp_name}/sample-{epoch}-{im_key}.pt"
+                        torch.save(pred, filename)
+                        saved+=1
 
                 run.log({"val/loss": sum(_loss) / len(_loss)})
 
         torch.save(model.state_dict(), f"{checkpoint_dir}/{exp_name}/epoch-{epoch}.pt")
-    
 
 
 train()
