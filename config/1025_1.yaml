@@ -26,7 +26,7 @@ exp:
   grad_accu: 6
   batch_size: 10
   epochs: 40
-  # betas: [0.96, 0.99]
+  betas: [0.96, 0.99]
   alpha: 0.5
   cache_dir: "/content/drive/MyDrive/brainstormers/cache.hdf5"
   checkpoint_dir: "/content/drive/MyDrive/brainstormers/231025"
