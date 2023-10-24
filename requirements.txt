@@ -4,7 +4,7 @@ pandas
 matplotlib
 scipy
 transformers
-diffusers
+diffusers==0.11.1
 torch
 torchvision
 tqdm
