@@ -21,10 +21,10 @@ model:
   dropout: 0.1
 
 exp:
-  exp_name: "1025_1"
+  exp_name: "1025_singlebatch"
   learning_rate: 0.005
-  grad_accu: 6
-  batch_size: 10
+  grad_accu: 1
+  batch_size: 1
   epochs: 40
   betas: [0.96, 0.99]
   alpha: 0.5
@@ -36,6 +36,7 @@ exp:
   output_scale: 0.1
   seed: 1123498
   just_one_pre_run: True
+  save_term: 5
 
   metrics:
     - l2

@@ -52,6 +52,8 @@ except:
 b1, b2 = exp_cfg["betas"]
 alpha = exp_cfg["alpha"]
 
+just_one = exp_cfg["just_one_pre_run"]
+
 cache_dir = exp_cfg["cache_dir"]
 checkpoint_dir = exp_cfg["checkpoint_dir"]
 # os.mkdir(checkpoint_dir)
@@ -73,6 +75,7 @@ Path(checkpoint_dir).mkdir(exist_ok=True)
 seed = exp_cfg["seed"]
 
 valid_term = 1
+save_term = exp_cfg["save_term"]
 
 output_scale = exp_cfg["output_scale"]
 
@@ -149,7 +152,8 @@ def train():
     for epoch in range(epochs):
         # Main Training
         _loss = []
-        for step, batch in enumerate(tqdm.tqdm(train_loader)):
+        loader = train_loader if not just_one else [next(iter(train_loader))]
+        for step, batch in enumerate(tqdm.tqdm(loader)):
             x, y, _ = batch
             yhat = model(x)
 
@@ -160,7 +164,7 @@ def train():
             _loss.append(loss.item())
 
             # Gradient Accumulation hahahahahahahahahahhaha I need just A100 
-            if (step+1)%grad_accum==0:
+            if just_one or (step+1)%grad_accum==0:
                 nn.utils.clip_grad_norm_(model.parameters(), max_norm=grad_clip, norm_type=2)
                 optimizer.step()
                 optimizer.zero_grad(set_to_none=True)
@@ -169,7 +173,7 @@ def train():
         # run.log({"train/loss": _loss.sum() / len(_loss)})
         run.log({"train/loss": sum(_loss) / len(_loss)})
         
-        if epoch % valid_term == 0:
+        if epoch % valid_term == 0 and not just_one:
             with torch.no_grad():
                 _loss = []
                 _saved = 0
@@ -191,7 +195,8 @@ def train():
 
                 run.log({"val/loss": sum(_loss) / len(_loss)})
 
-        torch.save(model.state_dict(), f"{checkpoint_dir}/{exp_name}/epoch-{epoch}.pt")
+        if (epoch+1)%save_term == 0:
+            torch.save(model.state_dict(), f"{checkpoint_dir}/{exp_name}/epoch-{epoch}.pt")
 
 
 train()
