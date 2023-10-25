@@ -47,7 +47,7 @@ def define_model(trial):
     #     - C
     #     - T
     #   dropout: 0.1
-    dropout = trial.suggest_float("dropout", 0, 1e-2, log=True)
+    dropout = trial.suggest_float("dropout",1e-2, 1e-1, log=True)
     third_layer = trial.suggest_int("third_layer", 1, 3)
     forth_layer = trial.suggest_int("forth_layer", 1, 4)
     model_cfg = {"image_shape": [320, 240], "initial_channel": 42, "num_blocks": [2, 2, third_layer, forth_layer], "channels": [42, 64, 196, 384, 768], "block_type": ["C", "C", "T", "T"], "dropout": dropout}
@@ -78,7 +78,7 @@ def objective(trial):
 
     optimizer_type = trial.suggest_categorical("optimizer", ["Adam", "AdamW", "SGD"])
     learning_rate = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
-    weight_decay = trial.suggest_float("weight_decay", 0, 0.1)
+    weight_decay = trial.suggest_float("weight_decay", 0.001, 0.1)
     alpha = trial.suggest_float("alpha", 0, 1)
     grad_clip = trial.suggest_int("grad_clip", 0, 5)
 
