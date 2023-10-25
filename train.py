@@ -1,20 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-# from torchmetrics impt functional as FM
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import WandbLogger
 import wandb
 import tqdm
 
 from argparse import ArgumentParser
-import os
-import time
 from pathlib import Path
-# from dataclasses import Union
-
-import optuna
-from optuna.trial import TrialState
 
 from model import LinearModel, CoAtNet
 from dataloader import create_dataloader
@@ -25,11 +17,9 @@ from utils import read_config
 parser = ArgumentParser(description="braincoder training pipeline")
 
 deafult_model_name = "linear"
-# parser.add_argument("--model_name", default=deafult_model_name, type=str)
 parser.add_argument("--cfg", default="./config/exp_config_yaml", type=str)
 
 args = parser.parse_args()
-# model_name = args.model_name
 cfg_file_path = args.cfg
 
 # ================= HYPER PARAMETERS ================
@@ -61,8 +51,6 @@ just_one = exp_cfg["just_one_pre_run"]
 
 cache_dir = exp_cfg["cache_dir"]
 checkpoint_dir = exp_cfg["checkpoint_dir"]
-# os.mkdir(checkpoint_dir)
-# os.makedirs(checkpoint_dir, exist_ok=True)
 image_dir = exp_cfg["image_dir"]
 
 num_to_samples = exp_cfg["num_to_samples"]
@@ -91,56 +79,33 @@ train_loader, eval_loader = create_dataloader(batch_size=batch_size, cache_dir=c
 
 to_samples = []
 to_samples_keys = []
-# for i in range(num_to_samples):
-temp, _, key = next(iter(eval_loader))
-to_samples = temp[:num_to_samples].to("cpu")
-to_samples_keys = key[:num_to_samples]
-print(to_samples_keys)
-# to_samples = torch.stack(to_samples, dim=0).to(device)
-#to_sample = next(iter(eval_loader))
 
-# ================== LOGGER =================
-# wandb_logger = WandbLogger(project="braincoder")
+# ================== Load Model =================
 model = models[model_name].from_cfg(model_cfg).to(device)
-
 total_parameters = model.num_parameters()
 
+# ================== LOGGER =================
 run = wandb.init(
   project="braincoder",
-  config={**model_cfg,**exp_cfg, "param": total_parameters}
+  config={**model_cfg, **exp_cfg, "param": total_parameters}
 )
 
-# ------------------ Prepare DIFFUSION GUYS ---------------------
-# vae, unet, scheduler = prepare_diffuser(device=device)
-# tokenizer, text_encoder = prepare_text_embedding(device=device)
-
-
-# ---------------- VANILLA TRaining LOOP --------------------
-# compiled_model = torch.compile(model)
-# are you criminal?
-# wandb.watch(model, log="gradients")
-
+# ================== Training Loop =================
 def loss_term(y, y_hat):
     # Base LOSS will be L2
     # mse_loss = alpha*F.mse_loss(y_hat, y)
     mse_loss = ((y_hat-y)**2).mean()
 
     if "kl" in metrics:
-        # loss = loss + (1-alpha)*F.kl_div(F.softmax(y_hat), F.softmax(y))
-        # loss = loss + (1-alpha)*F.kl_div(F.log_softmax(y_hat, 0), F.softmax(y, 0), reduction="none").mean()
         epsilon = 1e-10
         q_distribution_clamped = torch.clamp(y_hat, min=epsilon)
         p_distribution_clamped = torch.clamp(y, min=epsilon)
         kl_loss = F.kl_div(q_distribution_clamped.log(), p_distribution_clamped, reduction='batchmean')
         loss = mse_loss + (1-alpha) * kl_loss
-    elif "contrastive" in metrics:
-        # loss = loss + (1-alpha)*
-        pass
     elif "cross_en" in metrics:
         cross_loss = F.cross_entropy(y_hat, y)
         loss = mse_loss + (1-alpha)*cross_loss
     elif "cos" in metrics:
-        # cos_loss = F.cosine_embedding_loss()
         cos_loss = 1 - torch.cosine_similarity(y_hat, y, dim=-1).mean()
         loss = alpha*mse_loss + (1-alpha)*cos_loss
 
@@ -155,7 +120,6 @@ def train():
         optimizer = torch.optim.SGD(model.get_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, momentum=0.9)
 
     for epoch in range(epochs):
-        # Main Training
         _loss = []
         loader = train_loader if not just_one else [next(iter(train_loader))]
         for step, batch in enumerate(tqdm.tqdm(loader)):
@@ -168,14 +132,11 @@ def train():
             loss.backward()
             _loss.append(loss.item())
 
-            # Gradient Accumulation hahahahahahahahahahhaha I need just A100 
             if just_one or (step+1)%grad_accum==0 or step+1==len(loader):
                 nn.utils.clip_grad_norm_(model.parameters(), max_norm=grad_clip, norm_type=2)
                 optimizer.step()
                 optimizer.zero_grad(set_to_none=True)
                 
-        # _loss.append(loss.cpu().detach().item())
-        # run.log({"train/loss": _loss.sum() / len(_loss)})
         run.log({"train/loss": sum(_loss) / len(_loss)})
         
         if epoch % valid_term == 0 and not just_one:
@@ -206,7 +167,6 @@ def train():
 
         if (epoch+1)%save_term == 0:
             torch.save(model.state_dict(), f"{checkpoint_dir}/{exp_name}/epoch-{epoch}.pt")
-
 
 train()
 

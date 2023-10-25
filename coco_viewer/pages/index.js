@@ -41,9 +41,9 @@ export default function Home() {
             see();
             setOnSee(false);
             getImage();
-            setTimer(5);
+            setTimer(4);
             // Send request to the websocket peer for the data.
-        }, second * 10);
+        }, second * 2);
 
         return () => clearTimeout(tout);
     }, [onSee]);
@@ -110,7 +110,7 @@ export default function Home() {
                 ) : (
                     <div className='text-center'>
                         <div className='mb-10 text-6xl font-extrabold'>
-                            <h1>사진 만장 보기 ㅆㄱㄴ</h1>
+                            <h1>사진 만장 보기</h1>
                         </div>
                         <button
                             className='px-10 py-5 font-bold text-3xl bg-white text-gray-600 rounded-xl hover:bg-gray-200 hover:text-red-500 hover:scale-125'
