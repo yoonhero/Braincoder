@@ -169,7 +169,7 @@ def train():
             _loss.append(loss.item())
 
             # Gradient Accumulation hahahahahahahahahahhaha I need just A100 
-            if just_one or (step+1)%grad_accum==0:
+            if just_one or (step+1)%grad_accum==0 or step+1==len(loader):
                 nn.utils.clip_grad_norm_(model.parameters(), max_norm=grad_clip, norm_type=2)
                 optimizer.step()
                 optimizer.zero_grad(set_to_none=True)
