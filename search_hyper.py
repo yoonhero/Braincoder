@@ -79,7 +79,8 @@ def objective(trial):
     optimizer_type = trial.suggest_categorical("optimizer", ["Adam", "AdamW", "SGD"])
     learning_rate = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
     weight_decay = trial.suggest_float("weight_decay", 0.001, 0.1)
-    alpha = trial.suggest_float("alpha", 0, 1)
+    # alpha = trial.suggest_float("alpha", 0, 1)
+    alpha = 0.9
     grad_clip = trial.suggest_int("grad_clip", 0, 5)
 
     if optimizer_type == "Adam":
