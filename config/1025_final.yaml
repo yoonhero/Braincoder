@@ -28,14 +28,14 @@ model:
     - C 
     - T
     - T
-  dropout: 0.035140161509175816
+  dropout: 0.035
 
 exp:
   model_name: "coatnet"
   exp_name: "1025_final"
-  learning_rate: 0.00077
+  learning_rate: 0.003
   grad_accu: 5
-  batch_size: 18
+  batch_size: 16
   epochs: 50
   betas: [0.96, 0.99]
   alpha: 0.9
@@ -44,7 +44,7 @@ exp:
   image_dir: "/content/dataset"
   num_to_samples: 5
   how_many_to_save: 5
-  output_scale: 0.01
+  output_scale: 1
   seed: 1123498
   just_one_pre_run: False
   save_term: 1
