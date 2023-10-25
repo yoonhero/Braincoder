@@ -13,6 +13,9 @@ import time
 from pathlib import Path
 # from dataclasses import Union
 
+import optuna
+from optuna.trial import TrialState
+
 from model import LinearModel, CoAtNet
 from dataloader import create_dataloader
 from diffusion_helper import generate, prepare_diffuser, prepare_text_embedding
@@ -22,11 +25,11 @@ from utils import read_config
 parser = ArgumentParser(description="braincoder training pipeline")
 
 deafult_model_name = "linear"
-parser.add_argument("--model_name", default=deafult_model_name, type=str)
+# parser.add_argument("--model_name", default=deafult_model_name, type=str)
 parser.add_argument("--cfg", default="./config/exp_config_yaml", type=str)
 
 args = parser.parse_args()
-model_name = args.model_name
+# model_name = args.model_name
 cfg_file_path = args.cfg
 
 # ================= HYPER PARAMETERS ================
@@ -39,6 +42,8 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 cfg = read_config(cfg_file_path)
 exp_cfg = cfg["exp"]
 model_cfg = cfg["model"]
+
+model_name = exp_cfg["model_name"]
 
 learning_rate = exp_cfg["learning_rate"] 
 batch_size = exp_cfg["batch_size"]
@@ -131,10 +136,10 @@ def loss_term(y, y_hat):
     elif "contrastive" in metrics:
         # loss = loss + (1-alpha)*
         pass
-    elif "cross_en":
+    elif "cross_en" in metrics:
         cross_loss = F.cross_entropy(y_hat, y)
         loss = mse_loss + (1-alpha)*cross_loss
-    elif "cos":
+    elif "cos" in metrics:
         # cos_loss = F.cosine_embedding_loss()
         cos_loss = 1 - torch.cosine_similarity(y_hat, y, dim=-1).mean()
         loss = alpha*mse_loss + (1-alpha)*cos_loss
@@ -154,7 +159,7 @@ def train():
         _loss = []
         loader = train_loader if not just_one else [next(iter(train_loader))]
         for step, batch in enumerate(tqdm.tqdm(loader)):
-            x, y, _ = batch
+            x, y, im_key = batch
             yhat = model(x)
 
             loss = loss_term(y, yhat)
@@ -194,6 +199,10 @@ def train():
                         _saved+=1
 
                 run.log({"val/loss": sum(_loss) / len(_loss)})
+        
+        if just_one:
+            filename = f"{checkpoint_dir}/{exp_name}/sample-{epoch}-{im_key}.pt"
+            torch.save(yhat, filename)
 
         if (epoch+1)%save_term == 0:
             torch.save(model.state_dict(), f"{checkpoint_dir}/{exp_name}/epoch-{epoch}.pt")
