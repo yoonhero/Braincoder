@@ -267,7 +267,7 @@ class CoAtNet(nn.Module):
         # self.s0 = self._make_layer(conv_3x3_bn, initial_channel, channels[0], num_blocks[0], (ih//2, iw//2))
 
         self.layers = nn.ModuleList([])
-        for i in range(4):
+        for i in range(len(block_type)):
             _image_shape = (ih // (2**(i+1)), iw // (2**(i+1)))
             _s = self._make_layer(block[block_type[i]], channels[i], channels[i+1], num_blocks[i], _image_shape, dropout=dropout)
             self.layers.append(_s)
