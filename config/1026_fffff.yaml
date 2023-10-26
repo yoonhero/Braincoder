@@ -1,0 +1,48 @@
+# A100
+model:
+  image_shape: [240, 320]
+  initial_channel: 42
+  num_blocks: 
+    - 2
+    - 2
+    - 2
+    - 4
+  channels: 
+    - 42
+    - 64
+    - 196
+    - 384
+    - 768
+  block_type: 
+    - C
+    - C 
+    - T
+    - T
+  dropout: 0.1
+
+exp:
+  model_name: "coatnet"
+  exp_name: "1026_fffff"
+  learning_rate: 0.001
+  grad_accu: 6
+  batch_size: 14
+  epochs: 200
+  betas: [0.96, 0.99]
+  alpha: 0.9
+  cache_dir: "/content/drive/MyDrive/brainstormers/cache.hdf5"
+  checkpoint_dir: "/content/drive/MyDrive/brainstormers/231026"
+  image_dir: "/content/dataset"
+  num_to_samples: 5
+  how_many_to_save: 10
+  output_scale: 1
+  seed: 1123498
+  just_one_pre_run: False
+  save_term: 1
+
+  metrics:
+    - l2
+    - cos
+  optimizer: "AdamW"
+  weight_decay: 0.2
+  grad_clip: 5.0
+  log: True

@@ -24,19 +24,19 @@ def get_info_table(participant):
     print(to)
     for i, (start, end) in enumerate(to):
         # START
-        one = (start+1, start+3)
+        one = (start+0.5, start+2.5)
 
         # MIDDLE
         halfdis = (end-start)/2
         two = (start+halfdis-1, start+halfdis+1)
 
         # END
-        three = (end-3, end-1)
+        three = (end-2.5, end-.5)
 
         _d = [one, two, three]
         table[i] = _d
 
-
+    table = {1: table[1], 5: table[5], 7: table[7], 9: table[9]}
     return table
 
 def build(participant):
@@ -84,13 +84,13 @@ def build(participant):
     #     p.map(draw_spectrogram, total)
     already = glob.glob("./eval/eeg/*")
     already = [_dir.split('/')[-1] for _dir in already]
-    for a in total:
+    for a in tqdm.tqdm(total):
         if a["out"].split("/")[-1] in already:
             print("pass")
             continue
         draw_spectrogram(a["data"], a["out"])
 
 # experiment_participants = ["jjw", "jsm"]
-experiment_participants = ["kdh", "cmj"]
+experiment_participants = ["kdh", "cmj", "jsm", "kjh", "jyh", "kian", "csw", "kho"]
 for participant in experiment_participants:
     build(participant)
