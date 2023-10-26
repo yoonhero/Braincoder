@@ -1,6 +1,6 @@
 # A100
 model:
-  image_shape: [320, 240]
+  image_shape: [240, 320]
   initial_channel: 42
   num_blocks: 
     - 2
