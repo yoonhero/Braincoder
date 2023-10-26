@@ -276,7 +276,8 @@ class CoAtNet(nn.Module):
         # self.pool = nn.AvgPool2d(ih // 32, 1)
 
         # out = CoAtNet.CLIP_SHAPE[0] * CoAtNet.CLIP_SHAPE[1]
-        out = (ih // 16) * (iw // 16)
+        factor = 2**len(block_type)
+        out = (ih // factor) * (iw // factor)
         self.proj = nn.Sequential(
             Rearrange("b c ih iw -> b c (ih iw)"),
             nn.Linear(out, CoAtNet.CLIP_SHAPE[0]), 
