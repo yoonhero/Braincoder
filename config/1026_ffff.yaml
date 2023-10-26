@@ -24,8 +24,8 @@ exp:
   model_name: "coatnet"
   exp_name: "1026_ffff"
   learning_rate: 0.001
-  grad_accu: 6
-  batch_size: 14
+  grad_accu: 2
+  batch_size: 42
   epochs: 200
   betas: [0.96, 0.99]
   alpha: 0.9
