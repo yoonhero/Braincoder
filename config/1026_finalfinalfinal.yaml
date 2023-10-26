@@ -1,14 +1,4 @@
-# Very nice hyperparameters
-# Best trial:
-#   Value:  0.001003670389764011
-#   Params: 
-#     dropout: 0.035140161509175816
-#     third_layer: 2
-#     forth_layer: 4
-#     optimizer: Adam
-#     lr: 0.0007737297489778149
-#     weight_decay: 0.0010272784773375425
-#     grad_clip: 1
+# A100
 model:
   image_shape: [320, 240]
   initial_channel: 42
@@ -28,22 +18,22 @@ model:
     - C 
     - T
     - T
-  dropout: 0.035
+  dropout: 0.1
 
 exp:
   model_name: "coatnet"
   exp_name: "1025_finalfinal"
-  learning_rate: 0.003
-  grad_accu: 6
-  batch_size: 16
-  epochs: 100
+  learning_rate: 0.001
+  grad_accu: 2
+  batch_size: 42
+  epochs: 200
   betas: [0.96, 0.99]
   alpha: 0.9
   cache_dir: "/content/drive/MyDrive/brainstormers/cache.hdf5"
   checkpoint_dir: "/content/drive/MyDrive/brainstormers/231025"
   image_dir: "/content/dataset"
   num_to_samples: 5
-  how_many_to_save: 5
+  how_many_to_save: 10
   output_scale: 1
   seed: 1123498
   just_one_pre_run: False
@@ -53,6 +43,6 @@ exp:
     - l2
     - cos
   optimizer: "Adam"
-  weight_decay: 0.0010272784773375425
+  weight_decay: 0.01
   grad_clip: 1.0
   log: True

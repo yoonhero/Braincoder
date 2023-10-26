@@ -40,7 +40,7 @@ def generate(embedding, vae: AutoencoderKL, unet: UNet2DConditionModel, schedule
 
         # predict the noise residual
         with torch.no_grad():
-            noise_pred = unet(latent_model_input, t, encoder_hidden_states=embedding, cross_attention_kwargs=None).sample
+            noise_pred = unet(latent_model_input, t, encoder_hidden_states=embedding).sample
 
         # classifier-free guidance implementation
         noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
