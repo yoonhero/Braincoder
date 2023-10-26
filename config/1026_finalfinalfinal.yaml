@@ -22,7 +22,7 @@ model:
 
 exp:
   model_name: "coatnet"
-  exp_name: "1025_finalfinal"
+  exp_name: "1026_finalfinal"
   learning_rate: 0.001
   grad_accu: 6
   batch_size: 14
@@ -30,7 +30,7 @@ exp:
   betas: [0.96, 0.99]
   alpha: 0.9
   cache_dir: "/content/drive/MyDrive/brainstormers/cache.hdf5"
-  checkpoint_dir: "/content/drive/MyDrive/brainstormers/231025"
+  checkpoint_dir: "/content/drive/MyDrive/brainstormers/231026"
   image_dir: "/content/dataset"
   num_to_samples: 5
   how_many_to_save: 10
