@@ -34,7 +34,7 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
 
         if width != None and height != None:
             self.transforms = T.Compose([
-                T.Resize((width, height)),
+                T.Resize((height, width)),
                 T.ToTensor()
             ])
         else:
