@@ -90,6 +90,7 @@ def build(participant):
             continue
         draw_spectrogram(a["data"], a["out"])
 
-experiment_participants = ["jjw", "jsm"]
+# experiment_participants = ["jjw", "jsm"]
+experiment_participants = ["kdh", "cmj"]
 for participant in experiment_participants:
     build(participant)

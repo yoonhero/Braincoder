@@ -33,14 +33,16 @@ transform = T.Compose([
 ])
 
 model = CoAtNet.from_trained(cfg["model"], checkpoint_dir)
+model.eval()
+model.to(device)
 vae, unet, scheduler = prepare_diffuser(device)
 
 for img_id in range(20):
     for con in ["start", 'middle', "end"]:
         start = time.time()
 
-        paths = [f"{im_base_dir}/{participant}_{img_id+1}_{con}_c_{channel}" for channel in range(14)]
-        spectos = load_spectos(paths, transform, device=device)
+        paths = [f"{im_base_dir}/{participant}_{img_id+1}_{con}_c_{channel}.png" for channel in range(14)]
+        spectos = load_spectos(paths, transform, device=device).unsqueeze(0)
 
         embedding = model(spectos) / output_scale
         

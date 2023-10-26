@@ -13,26 +13,29 @@ model:
   image_shape: [320, 240]
   initial_channel: 42
   num_blocks: 
-    - 1
-    - 1
-    - 1
+    - 2
+    - 2
+    - 2
+    - 4
   channels: 
     - 42
+    - 64
     - 196
     - 384
     - 768
   block_type: 
-    - C 
     - C
+    - C 
     - T
-  dropout: 0.1
+    - T
+  dropout: 0.035
 
 exp:
   model_name: "coatnet"
-  exp_name: "1025_fff"
-  learning_rate: 0.01
+  exp_name: "1025_finalfinal"
+  learning_rate: 0.003
   grad_accu: 6
-  batch_size: 14
+  batch_size: 16
   epochs: 100
   betas: [0.96, 0.99]
   alpha: 0.9
@@ -49,7 +52,7 @@ exp:
   metrics:
     - l2
     - cos
-  optimizer: "SGD"
-  weight_decay: 0.01
+  optimizer: "Adam"
+  weight_decay: 0.0010272784773375425
   grad_clip: 1.0
   log: True

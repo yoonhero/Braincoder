@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     # print(coco.find_image("000000050403"))
     # print(coco.find_image("000000537802"))
-    print(coco.find_image("000000558012"))
+    print(coco.find_image("000000301765"))
     
     
     # keys = coco.sample_with_topic("man")
