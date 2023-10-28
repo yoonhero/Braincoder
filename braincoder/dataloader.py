@@ -133,8 +133,8 @@ class COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset(Dataset):
 def create_dataloader(batch_size, image_dir, scale, cache_dir, device, seed=1234):
     G = torch.Generator()
     G.manual_seed(seed)
-    train_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./tabular_datasets/train_dataset.json", image_dir, scale, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
-    eval_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("./tabular_datasets/eval_dataset.json", image_dir, scale, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
+    train_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("../datasets/train_dataset.json", image_dir, scale, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
+    eval_dataset = COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset("../datasets/eval_dataset.json", image_dir, scale, device=device, width=320, height=240, from_cache=True, cache_dir=cache_dir)
 
     trainloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, generator=G, num_workers=0)
     evalloader = DataLoader(eval_dataset, batch_size=batch_size, shuffle=False, generator=G, num_workers=0)
