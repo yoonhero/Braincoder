@@ -4,7 +4,7 @@
 
 ## Braincoder
 
-We suggest new approach to reconstruct the visual stimuli from Brain EEG Signals. Recent researchs keep focus on reconstructing using EEG or MEG with time series format, for example [META's research](https://ai.meta.com/static-resource/image-decoding). Although it seems like impossible that reconstructing visual stimuli from ugly 14 spectograms, we show that this can be possible to some extent.
+We suggest new approach to reconstruct the visual stimuli from Brain EEG Signals. Recent researchs keep focus on reconstructing using EEG or MEG with time series format, for example [META's research](https://ai.meta.com/static-resource/image-decoding). Although it seems like impossible that reconstructing visual stimuli from ugly 14 spectrograms, we show that this can be possible to some extent.
 
 ## Overview
 
