@@ -178,3 +178,14 @@ cache.hdf5
 
 *.edf
 eval/eeg
+
+
+
+vizviz.ipynb
+*.zip
+braincoder/eval
+braincoder/analysis.ipynb
+viz_utils/*.jpg
+viz_utils/captions_val2014.json
+viz_utils/gradual_animation
+*.ttf

@@ -1,0 +1,38 @@
+model:
+  image_shape: [320, 240]
+  initial_channel: 42
+  num_blocks: 
+    - 2
+    - 3
+    - 5
+    - 2
+  channels: 
+    - 42
+    - 64
+    - 196
+    - 384
+    - 768
+  block_type: 
+    - C
+    - C 
+    - T
+    - T
+
+exp:
+  exp_name: 1022_1
+  learning_rate: 0.001
+  grad_accu: 1
+  batch_size: 10
+  epochs: 20
+  betas: [0.95, 0.99]
+  alpha: 0.7
+  cache_dir: "/content/drive/MyDrive/brainstormers/cache.hdf5"
+  checkpoint_dir: "/content/drive/MyDrive/brainstormers/231022"
+  image_dir: "/content/dataset"
+  num_to_samples: 5
+  how_many_to_save: 1
+
+  metrics:
+    - l2
+    - kl
+  log: True

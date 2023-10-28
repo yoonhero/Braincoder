@@ -14,3 +14,5 @@ PyYAML
 einops
 wandb
 accelerate
+optuna
+pypygifmaker
