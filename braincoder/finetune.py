@@ -130,7 +130,7 @@ class FineTuneDataset(Dataset):
         return len(self.dataset)
 
 
-train_dataset = FineTuneDataset(participant, image_dir, output_scale, devcie=device, cache_dir=cache_dir)
+train_dataset = FineTuneDataset(participant, image_dir, output_scale, device=device, cache_dir=cache_dir)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
 to_samples = []
