@@ -31,7 +31,7 @@ exp:
   betas: [0.96, 0.99]
   alpha: 0.9
   cache_dir: "/content/drive/MyDrive/brainstormers/finetune_cache.hdf5"
-  pretrain_dir: "/coatnet/drive/MyDrive/brainstormers/231027/1027_runrun/epoch-42.pt"
+  pretrain_dir: "/content/drive/MyDrive/brainstormers/231027/1027_runrun/epoch-42.pt"
   checkpoint_dir: "/content/drive/MyDrive/brainstormers/231027"
   image_dir: "/content/eeg"
   output_scale: 1

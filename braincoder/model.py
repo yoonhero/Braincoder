@@ -310,7 +310,7 @@ class CoAtNet(nn.Module):
 
         # Train only last projection layer on fine-tuning process.
         if finetune:
-            for p, pn in model.named_parameters():
+            for pn, p in model.named_parameters():
                 if not pn.endswith('proj.1.weight'):
                     p.requires_grad = False
 

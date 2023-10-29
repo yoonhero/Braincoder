@@ -97,7 +97,7 @@ class FineTuneDataset(Dataset):
             for im_id in range(1, 21):
                 _spec = [f"{self.image_dir}/{participant}_{im_id}_{con}_c_{c}.png" for c in range(14)]
                 if not os.path.exists(_spec[0]): continue
-                dataset.append(im_id, _spec, "")
+                dataset.append((im_id, _spec, ""))
 
         # id,src,caption,start,end,width,height, spectogram
         self.dataset = dataset
