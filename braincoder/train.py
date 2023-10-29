@@ -18,6 +18,7 @@ parser = ArgumentParser(description="braincoder training pipeline")
 
 deafult_model_name = "linear"
 parser.add_argument("--cfg", default="./config/exp_config_yaml", type=str)
+# parser.add_argument("--transfer", action="store_true")
 
 args = parser.parse_args()
 cfg_file_path = args.cfg

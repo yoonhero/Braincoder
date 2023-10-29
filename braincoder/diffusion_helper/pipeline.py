@@ -80,7 +80,7 @@ def text2img(prompt, device="cuda"):
 
 def get_uncond(device="cuda"): 
     try:
-        uncond_embeddings = torch.load("./uncond.pt").to(device)
+        uncond_embeddings = torch.load("./diffusion_helper/uncond.pt").to(device)
     except:
         tokenizer, text_encoder = prepare_text_embedding(device)
         max_length = 77

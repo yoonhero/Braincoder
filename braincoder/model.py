@@ -303,10 +303,16 @@ class CoAtNet(nn.Module):
         return cls(cfg["image_shape"], cfg["num_blocks"], cfg["channels"], cfg["block_type"], dropout=cfg["dropout"])
 
     @classmethod
-    def from_trained(cls, cfg, path):
+    def from_pretrained(cls, cfg, path, finetune=False):
         model = cls.from_cfg(cfg)
         param = torch.load(path)
         model.load_state_dict(param)
+
+        # Train only last projection layer on fine-tuning process.
+        if finetune:
+            for p, pn in model.named_parameters():
+                if not pn.endswith('proj.1.weight'):
+                    p.requires_grad = False
 
         return model
 
