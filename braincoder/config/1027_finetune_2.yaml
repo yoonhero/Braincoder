@@ -1,0 +1,48 @@
+# A100
+model:
+  image_shape: [240, 320]
+  initial_channel: 42
+  num_blocks: 
+    - 2
+    - 2
+    - 2
+    - 4
+  channels: 
+    - 42
+    - 64
+    - 196
+    - 384
+    - 768
+  block_type: 
+    - C
+    - C 
+    - T
+    - T
+  dropout: 0.2
+
+exp:
+  model_name: "coatnet"
+  exp_name: "1027_finetune_2"
+  participant: "cmj"
+  learning_rate: 0.001
+  grad_accu: 1
+  batch_size: 14
+  epochs: 50
+  betas: [0.96, 0.99]
+  alpha: 0.9
+  cache_dir: "/content/drive/MyDrive/brainstormers/finetune_cache.hdf5"
+  pretrain_dir: "/content/drive/MyDrive/brainstormers/231027/1027_runrun/epoch-42.pt"
+  checkpoint_dir: "/content/drive/MyDrive/brainstormers/231027"
+  image_dir: "/content/eeg"
+  output_scale: 1
+  seed: 1123498
+  just_one_pre_run: False
+  save_term: 1
+
+  metrics:
+    - l2
+    - cos
+  optimizer: "AdamW"
+  weight_decay: 0.2
+  grad_clip: 5.0
+  log: True
