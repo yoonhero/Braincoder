@@ -177,7 +177,7 @@ def train():
         train_loss = train_one_epoch(model=model, loader=loader, optimizer=optimizer)
         run.log({"train/loss": train_loss})
         
-        if epoch % valid_term == 0 and just_one:
+        if epoch % valid_term == 0 and not just_one:
             eval_loss = evaluation(epoch)
             run.log({"val/loss": eval_loss})
         

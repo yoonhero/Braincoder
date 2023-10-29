@@ -93,6 +93,6 @@ def build(participant):
     return
 
 # experiment_participants = ["jjw", "jsm"]
-experiment_participants = ["kdh", "cmj", "jsm", "kjh", "jyh", "kian", "csw", "kho"]
+experiment_participants = ["kdh", "cmj", "jsm", "kjh", "jyh", "kian", "csw", "kho", "jjw", "jsm"]
 for participant in experiment_participants:
     build(participant)
