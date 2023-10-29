@@ -220,7 +220,7 @@ class Transformer(nn.Module):
 
 class CoAtNet(nn.Module):
     CLIP_SHAPE = (77, 768)
-    def __init__(self, image_shape, num_blocks, channels, block_type=["C", "C", "T", "T"], dropout=0., training=True):
+    def __init__(self, image_shape, num_blocks, channels, block_type=["C", "C", "T", "T"], dropout=0., pretrain=True):
         super().__init__()
         ih, iw = image_shape
 
@@ -242,7 +242,7 @@ class CoAtNet(nn.Module):
             Rearrange("b c i -> b i c")
         )
 
-        if training:
+        if pretrain:
             self.apply(self._init_weights)
             
             for pn, p in self.named_parameters():
@@ -299,12 +299,12 @@ class CoAtNet(nn.Module):
         return sum([p.nelement() for p in self.parameters()])
 
     @classmethod
-    def from_cfg(cls, cfg):
-        return cls(cfg["image_shape"], cfg["num_blocks"], cfg["channels"], cfg["block_type"], dropout=cfg["dropout"])
+    def from_cfg(cls, cfg, pretrain=True):
+        return cls(cfg["image_shape"], cfg["num_blocks"], cfg["channels"], cfg["block_type"], dropout=cfg["dropout"], pretrain=pretrain)
 
     @classmethod
     def from_pretrained(cls, cfg, path, finetune=False):
-        model = cls.from_cfg(cfg)
+        model = cls.from_cfg(cfg, pretrain=False)
         param = torch.load(path)
         model.load_state_dict(param)
 
