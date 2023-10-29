@@ -16,7 +16,7 @@ from model import LinearModel, CoAtNet
 from dataloader import create_dataloader, COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset
 from diffusion_helper import generate, prepare_diffuser, prepare_text_embedding
 from utils import read_config, load_spectos
-from train import loss_term
+# from train import loss_term
 
 # Get SYS arguments of config file loading.
 parser = ArgumentParser(description="braincoder training pipeline")
@@ -150,6 +150,24 @@ run = wandb.init(
 
 
 # ================== Training Loop =================
+def loss_term(y, y_hat):
+    mse_loss = ((y_hat-y)**2).mean()
+
+    if "kl" in metrics:
+        epsilon = 1e-10
+        q_distribution_clamped = torch.clamp(y_hat, min=epsilon)
+        p_distribution_clamped = torch.clamp(y, min=epsilon)
+        kl_loss = F.kl_div(q_distribution_clamped.log(), p_distribution_clamped, reduction='batchmean')
+        loss = mse_loss + (1-alpha) * kl_loss
+    elif "cross_en" in metrics:
+        cross_loss = F.cross_entropy(y_hat, y)
+        loss = mse_loss + (1-alpha)*cross_loss
+    elif "cos" in metrics:
+        cos_loss = 1 - torch.cosine_similarity(y_hat, y, dim=-1).mean()
+        loss = alpha*mse_loss + (1-alpha)*cos_loss
+
+    return loss
+
 def train_one_epoch(model, loader, optimizer):
     _loss = []
 
