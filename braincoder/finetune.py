@@ -16,7 +16,7 @@ from model import LinearModel, CoAtNet
 from dataloader import create_dataloader, COCOCOCOCOCCOCOOCOCOCOCCOCOCOCODatset
 from diffusion_helper import generate, prepare_diffuser, prepare_text_embedding
 from utils import read_config, load_spectos
-from train import train_one_epoch
+from train import loss_term
 
 # Get SYS arguments of config file loading.
 parser = ArgumentParser(description="braincoder training pipeline")
@@ -150,6 +150,29 @@ run = wandb.init(
 
 
 # ================== Training Loop =================
+def train_one_epoch(model, loader, optimizer):
+    _loss = []
+
+    for step, batch in enumerate(tqdm.tqdm(loader)):
+        x, y, im_key = batch
+        yhat = model(x)
+
+        loss = loss_term(y, yhat)
+        loss /= grad_accum
+
+        loss.backward()
+        _loss.append(loss.item())
+
+        if (step+1)%grad_accum==0 or step+1==len(loader):
+            nn.utils.clip_grad_norm_(model.parameters(), max_norm=grad_clip, norm_type=2)
+            optimizer.step()
+            optimizer.zero_grad(set_to_none=True)
+                
+
+    mean_loss = sum(_loss) / len(_loss)
+    return mean_loss
+
+
 def finetune():
     if optimizer_type == "Adam":
         optimizer = torch.optim.Adam(model.get_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, betas=(b1, b2))
