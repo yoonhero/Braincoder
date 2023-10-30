@@ -289,6 +289,29 @@ class CoAtNet(nn.Module):
 
         return optim_groups
 
+    def get_optim_parameters(self, weight_decay):
+        decay = set()
+        no_decay = set()
+        whitelist_weight_modules = (nn.Conv2d, )
+        blacklist_weight_modules = (nn.BatchNorm2d, nn.Linear)
+        for mn, m in self.named_parameters():
+            # print(mn)
+            if isinstance(m, whitelist_weight_modules):
+                decay.add(mn)
+            elif isinstance(m, blacklist_weight_modules):
+                no_decay.add(mn)
+            else:
+                decay.add(mn)
+
+        param_dict = {pn: p for pn, p in self.named_parameters()}
+
+        optim_groups = [
+            {"params": [param_dict[pn] for pn in sorted(list(decay))], "weight_decay": weight_decay, "lr": 0.0001},
+            {"params": [param_dict[pn] for pn in sorted(list(no_decay))], "weight_decay": 0.0}
+        ]
+
+        return optim_groups
+
     def _init_weights(self, module):
         if isinstance(module, nn.Linear):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
@@ -309,10 +332,10 @@ class CoAtNet(nn.Module):
         model.load_state_dict(param)
 
         # Train only last projection layer on fine-tuning process.
-        if finetune:
-            for pn, p in model.named_parameters():
-                if not pn.endswith('proj.1.weight'):
-                    p.requires_grad = False
+        # if finetune:
+        #     for pn, p in model.named_parameters():
+        #         if not pn.endswith('proj.1.weight'):
+        #             p.requires_grad = False
 
         return model
 

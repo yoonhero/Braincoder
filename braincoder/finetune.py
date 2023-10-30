@@ -193,11 +193,11 @@ def train_one_epoch(model, loader, optimizer):
 
 def finetune():
     if optimizer_type == "Adam":
-        optimizer = torch.optim.Adam(model.get_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, betas=(b1, b2))
+        optimizer = torch.optim.Adam(model.get_optim_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, betas=(b1, b2))
     elif optimizer_type == "AdamW":
-        optimizer = torch.optim.AdamW(model.get_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, betas=(b1, b2))
+        optimizer = torch.optim.AdamW(model.get_optim_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, betas=(b1, b2))
     elif optimizer_type == "SGD":
-        optimizer = torch.optim.SGD(model.get_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, momentum=0.9)
+        optimizer = torch.optim.SGD(model.get_optim_parameters(weight_decay), lr=learning_rate, weight_decay=weight_decay, momentum=0.9)
 
     for epoch in range(epochs):
         train_loss = train_one_epoch(model=model, loader=train_loader, optimizer=optimizer)
