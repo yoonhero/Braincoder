@@ -14,12 +14,19 @@ The main idea of this research is that using an Image Encoder can be another sor
 
 ## Results
 
+
 ![result](./asset/results.png)
+
+<strong>Reconstruct Results</strong> from 14 EEG spectrograms.
+
+--- 
+
+![data](./asset/6471.png)
 
 <!-- ![animation](./asset/output.gif) -->
 <img src="./asset/output.gif" style="width=500px; height=500px;" />
 
-This animation show generated image development during training step from 14 EEG spectograms captured on gazing baseball playing image.
+This animation show generated image development during training step from 14 EEG spectograms captured on gazing baseball playing image displayed above.
 
 ## Acknowledge
 

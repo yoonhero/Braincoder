@@ -100,9 +100,9 @@ def get_emb(brain_embedding, device):
 
     return embeddings
 
-def brain2image(z, vae, unet, scheduler, device):
+def brain2image(z, vae, unet, scheduler, steps, device):
     embedding = get_emb(z, device)
-    generated_images = generate(embedding, vae=vae, unet=unet, scheduler=scheduler, device=device)
+    generated_images = generate(embedding, vae=vae, unet=unet, scheduler=scheduler, device=device, steps=steps)
 
     del embedding
     return generated_images

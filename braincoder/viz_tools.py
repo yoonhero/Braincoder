@@ -7,7 +7,7 @@ import numpy as np
 import edf_helper as helper
 from config import experiement_interval, hz, drive_src, channels
 import random
-import cv2
+# import cv2
 import tqdm
 from sklearn.manifold import TSNE
 import seaborn as sns
@@ -21,8 +21,9 @@ def viz_subplot_for_spectrogram_compare(data):
     fig = plt.figure()
     gs = fig.add_gridspec(4, 7)
     main = fig.add_subplot(gs[0:2, :])
-    main_img_src = drive_src + data["src"]
-    img = plt.imread(main_img_src)
+    # main_img_src = drive_src + data["src"]
+    main_img_src = data["src"]
+    img = plt.imread(main_img_src, format="jpg")
     main.imshow(img)
     main.axis("off")
     
@@ -31,7 +32,9 @@ def viz_subplot_for_spectrogram_compare(data):
         row = i//7+2
         column = i % 7
         ax = fig.add_subplot(gs[row, column])
-        img = plt.imread(_spec[i])
+        if not isinstance(_spec[i], np.ndarray):
+            img = plt.imread(_spec[i])
+        else: img = _spec[i]
         ax.imshow(img)
         ax.set_title(channels[i])
         ax.axis("off")
@@ -39,7 +42,9 @@ def viz_subplot_for_spectrogram_compare(data):
     fig.suptitle(data["caption"])
     fig.tight_layout()
     out = f'{data["id"]}.png'
+    # dot per inch
     fig.savefig(out, dpi=400)
+
 
 def viz_image_with_spectrogram(target_folder):
     file = glob.glob(target_folder + "/*.edf")[0]
@@ -112,5 +117,7 @@ def tsne_specific_channel(dir, channel_idx):
 if __name__ == "__main__":
     # viz_image_with_spectrogram("./raw/attempt_1")
     # tsne_specific_channel("./dataset", 0)
-
-    viz_subplot_for_spectrogram_compare()
+    # ({'license': 1, 'url': 'http://farm4.staticflickr.com/3228/2755941377_ea852330ca_z.jpg', 'file_name': 'COCO_val2014_000000006471.jpg', 'id': 6471, 'width': 500, 'date_captured': '2013-11-19 18:09:09', 'height': 333}, [{'image_id': 6471, 'id': 735287, 'caption': 'A baseball player holding a bat next to a base.'}, {'image_id': 6471, 'id': 738365, 'caption': 'A hitter is waiting for the pitch to be thrown'}, {'image_id': 6471, 'id': 743219, 'caption': 'A baseball player in a batting stance at home plate with the catcher in position to catch a pitch.'}, {'image_id': 6471, 'id': 827020, 'caption': 'A baseball player holds his bat and waits for the pitch. '}, {'image_id': 6471, 'id': 828315, 'caption': 'A man at bat waiting for a pitch with a catcher and umpire behind him and players from the opposing team in the dugout.'}])
+    spectrograms = [f"/Users/yoonseonghyeon/Downloads/dataset/6471_c_{c}.png" for c in range(14)]
+    data = {"spectrogram": spectrograms, "src": "http://farm4.staticflickr.com/3228/2755941377_ea852330ca_z.jpg", "caption": "A baseball player holding a bat next to a base.", "id": 6471}
+    viz_subplot_for_spectrogram_compare(data)
