@@ -41,7 +41,8 @@ model_cfg = cfg["model"]
 
 model_name = exp_cfg["model_name"]
 
-participant = exp_cfg["participant"]
+participants = exp_cfg["participants"]
+cons = exp_cfg["cons"]
 
 learning_rate = exp_cfg["learning_rate"] 
 batch_size = exp_cfg["batch_size"]
@@ -80,7 +81,7 @@ print(cfg)
 
 # =================== DATASET LOADING =====================
 class FineTuneDataset(Dataset):
-    def __init__(self, participant, image_dir, scale, device, cache_dir=None):
+    def __init__(self, participants, cons, image_dir, scale, device, cache_dir=None):
         self.device = device
         self.image_dir = image_dir
         self.scale = scale
@@ -93,11 +94,14 @@ class FineTuneDataset(Dataset):
         start_time_sec = time.time()
         
         dataset = []
-        for con in ["start", "middle", "end"]:
-            for im_id in range(1, 21):
-                _spec = [f"{self.image_dir}/{participant}_{im_id}_{con}_c_{c}.png" for c in range(14)]
-                if not os.path.exists(_spec[0]): continue
-                dataset.append((im_id, _spec, ""))
+        # for con in ["start", "middle", "end"]:
+        # for con in ["start"]:
+        for participant in participants:
+            for con in cons:
+                for im_id in range(1, 21):
+                    _spec = [f"{self.image_dir}/{participant}_{im_id}_{con}_c_{c}.png" for c in range(14)]
+                    if not os.path.exists(_spec[0]): continue
+                    dataset.append((im_id, _spec, ""))
 
         # id,src,caption,start,end,width,height, spectogram
         self.dataset = dataset
@@ -130,7 +134,7 @@ class FineTuneDataset(Dataset):
         return len(self.dataset)
 
 
-train_dataset = FineTuneDataset(participant, image_dir, output_scale, device=device, cache_dir=cache_dir)
+train_dataset = FineTuneDataset(participants, cons, image_dir, output_scale, device=device, cache_dir=cache_dir)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
 to_samples = []

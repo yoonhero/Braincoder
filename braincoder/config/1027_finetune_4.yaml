@@ -23,7 +23,19 @@ model:
 exp:
   model_name: "coatnet"
   exp_name: "1027_finetune_3"
-  participant: "cmj"
+  participant:
+    - cmj
+    - kdh
+    - jsm
+    - kjh
+    - jyh
+    - kian
+    - csw
+    - kho
+    - jjw
+  cons:
+    - start
+    - middle
   learning_rate: 0.001
   grad_accu: 1
   batch_size: 14
@@ -37,7 +49,7 @@ exp:
   output_scale: 1
   seed: 1123498
   just_one_pre_run: False
-  save_term: 1
+  save_term: 10
 
   metrics:
     - l2

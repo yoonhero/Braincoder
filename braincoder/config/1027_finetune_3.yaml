@@ -23,7 +23,12 @@ model:
 exp:
   model_name: "coatnet"
   exp_name: "1027_finetune_3"
-  participant: "cmj"
+  participants: 
+    - cmj
+  cons: 
+    - start
+    - middle
+    - end
   learning_rate: 0.001
   grad_accu: 1
   batch_size: 14
