@@ -23,7 +23,7 @@ model:
 exp:
   model_name: "coatnet"
   exp_name: "1027_finetune_3"
-  participant:
+  participants:
     - cmj
     - kdh
     - jsm
